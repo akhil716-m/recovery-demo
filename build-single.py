@@ -18,6 +18,20 @@ def read(rel_href):
 with open(os.path.join(ROOT, 'index.html'), encoding='utf-8') as f:
     html = f.read()
 
+# 0. Patch stale pre-rendered HTML in index.html so it matches our JS changes.
+#    React hydrates server-side HTML in place; if the HTML is stale the user
+#    sees old UI until JS loads. We fix the most visible mismatches here.
+#    - Remove the "Run engine" button (we merged it into Start simulation)
+#    - Update soft/hard chip colours from legacy green/red to indigo/amber
+html = re.sub(
+    r'<button[^>]*class="[^"]*btn-primary[^"]*"[^>]*>'
+    r'<svg[^>]*>.*?</svg>Run engine</button>',
+    '', html, flags=re.DOTALL)
+html = html.replace('color:#4cb782', 'color:#5e6ad2')
+html = html.replace('background:#4cb782', 'background:#5e6ad2')
+html = html.replace('color:#eb5757;', 'color:#f2994a;')
+html = html.replace('background:#eb5757', 'background:#f2994a')
+
 # 1. Remove <link rel="preload"> tags (not needed when everything is inline)
 html = re.sub(r'<link rel="preload"[^>]*/>', '', html)
 

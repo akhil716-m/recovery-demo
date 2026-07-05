@@ -391,8 +391,7 @@ ONBOARDING = """<script>
       st.textContent = '@keyframes rrDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(46px,-32px) scale(1.08)}}'
         +'@keyframes rrDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-52px,26px) scale(1.06)}}'
         +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}'
-        +'@keyframes rrDash{to{stroke-dashoffset:-420}}'
-        +'@keyframes rrMarquee{to{transform:translateX(-50%)}}';
+        +'@keyframes rrDash{to{stroke-dashoffset:-420}}';
       document.head.appendChild(st);
     }
     shell.style.padding = '0';
@@ -417,33 +416,29 @@ ONBOARDING = """<script>
       +'<path d="'+flow2+'" fill="none" stroke="'+OL(0.10)+'" stroke-width="1.5" stroke-dasharray="4 10" style="animation:rrDash 40s linear infinite"/>'
       +'</svg>';
     shell.appendChild(bgsvg);
-    // bottom marquee: a stream of half-cropped invoice cards across processors,
-    // failed payments flowing through retries into recovered — the product story
+    // bottom scatter: half-cropped invoice cards at uneven zigzag heights and
+    // slight tilts — read left to right the story goes failed → retrying →
+    // recovered, without looking like a structured marquee
     var invs = [
-      ['Stripe','#635BFF','INV-8412','$129.00','Recovered'],
-      ['Adyen','#0ABF53','INV-2087','$342.50','Failed'],
-      ['Chargebee','#FF6C36','INV-5531','$89.99','Retrying'],
-      ['Recurly','#7C3AED','INV-9174','$220.00','Recovered'],
-      ['Worldpay','#D71E28','INV-3308','$67.25','Failed'],
-      ['Braintree','#00A4DE','INV-7740','$415.00','Recovered'],
-      ['PayPal','#003087','INV-1266','$156.75','Retrying'],
-      ['Razorpay','#3395FF','INV-6893','$278.40','Recovered']
+      ['Adyen','#0ABF53','INV-2087','$342.50','Failed',       '1.5%','-36px','-3deg',0.8],
+      ['Worldpay','#D71E28','INV-3308','$67.25','Failed',     '16%','-10px','2deg',1],
+      ['Chargebee','#FF6C36','INV-5531','$89.99','Retrying',  '33%','-42px','-2deg',0.75],
+      ['PayPal','#003087','INV-1266','$156.75','Retrying',    '50%','-14px','1.5deg',0.95],
+      ['Recurly','#7C3AED','INV-9174','$220.00','Recovered',  '67%','-38px','-1.5deg',0.8],
+      ['Braintree','#00A4DE','INV-7740','$415.00','Recovered','84%','-8px','2.5deg',1]
     ];
     var stCol = {Failed:['#ef4444','rgba(239,68,68,0.10)'], Retrying:['#006DF9','rgba(0,109,249,0.10)'], Recovered:['#16a34a','rgba(34,197,94,0.12)']};
-    var cardsHtml = invs.map(function(v){
+    invs.forEach(function(v){
       var sc = stCol[v[4]];
-      return '<div style="width:212px;box-sizing:border-box;flex-shrink:0;background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 -8px 24px '+(_L?'rgba(2,6,23,0.06)':'rgba(0,0,0,0.35)')+'">'
-        +'<div style="display:flex;align-items:center;gap:9px">'
+      var c = el('div','position:absolute;left:'+v[5]+';bottom:'+v[6]+';width:212px;box-sizing:border-box;transform:rotate('+v[7]+');opacity:'+v[8]+';background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 -8px 24px '+(_L?'rgba(2,6,23,0.06)':'rgba(0,0,0,0.35)')+';pointer-events:none');
+      c.innerHTML =
+        '<div style="display:flex;align-items:center;gap:9px">'
         +'<span style="width:26px;height:26px;border-radius:8px;background:'+v[1]+';color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+v[0].charAt(0)+'</span>'
         +'<span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:'+TEXT+'">'+v[0]+'</span><span style="display:block;font-size:10px;color:'+GRAY2+'">'+v[2]+'</span></span>'
         +'<span style="text-align:right"><span style="display:block;font-size:12.5px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">'+v[3]+'</span><span style="display:inline-block;margin-top:2px;font-size:9.5px;font-weight:700;color:'+sc[0]+';background:'+sc[1]+';border-radius:999px;padding:2px 7px">'+v[4]+'</span></span>'
-        +'</div></div>';
-    }).join('');
-    var strip = el('div','position:absolute;left:0;right:0;bottom:-16px;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)');
-    var track = el('div','display:flex;gap:14px;width:max-content;animation:rrMarquee 60s linear infinite');
-    track.innerHTML = cardsHtml + cardsHtml;
-    strip.appendChild(track);
-    shell.appendChild(strip);
+        +'</div>';
+      shell.appendChild(c);
+    });
     var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 24px 76px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.

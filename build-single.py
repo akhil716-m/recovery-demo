@@ -388,9 +388,7 @@ ONBOARDING = """<script>
     // keyframes for the landing motion (injected once)
     if(!document.getElementById('rr-landing-anim')){
       var st = document.createElement('style'); st.id = 'rr-landing-anim';
-      st.textContent = '@keyframes rrFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}'
-        +'@keyframes rrFloat2{0%,100%{transform:translateY(-5px)}50%{transform:translateY(7px)}}'
-        +'@keyframes rrDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(46px,-32px) scale(1.08)}}'
+      st.textContent = '@keyframes rrDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(46px,-32px) scale(1.08)}}'
         +'@keyframes rrDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-52px,26px) scale(1.06)}}'
         +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}'
         +'@keyframes rrDash{to{stroke-dashoffset:-420}}';
@@ -407,9 +405,8 @@ ONBOARDING = """<script>
     shell.appendChild(blob1); shell.appendChild(blob2);
     // product-flavoured backdrop: dashboard grid, ghost invoice cards, and
     // dashed retry paths with payments travelling toward recovery
-    var flow1 = 'M -80 640 C 260 560, 520 720, 820 650 C 1120 580, 1320 520, 1720 600';
-    var flow2 = 'M 1700 250 C 1350 320, 1080 200, 800 260 C 520 320, 300 240, -60 300';
-    var cardFill = _L ? 'fill="#ffffff" fill-opacity="0.65"' : 'fill="#11161d" fill-opacity="0.55"';
+    var flow1 = 'M -80 760 C 300 700, 600 810, 900 750 C 1200 690, 1400 730, 1720 700';
+    var flow2 = 'M 1700 140 C 1350 190, 1050 110, 780 160 C 500 210, 260 150, -60 190';
     var bgsvg = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden');
     bgsvg.innerHTML =
       '<svg width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'
@@ -417,71 +414,56 @@ ONBOARDING = """<script>
       +'<rect width="1600" height="900" fill="url(#rr-grid)"/>'
       +'<path d="'+flow1+'" fill="none" stroke="rgba(0,109,249,'+(_L?0.22:0.28)+')" stroke-width="1.5" stroke-dasharray="5 9" style="animation:rrDash 30s linear infinite"/>'
       +'<path d="'+flow2+'" fill="none" stroke="'+OL(0.10)+'" stroke-width="1.5" stroke-dasharray="4 10" style="animation:rrDash 40s linear infinite"/>'
-      +'<circle r="4.5" fill="#006DF9" opacity="0.5"><animateMotion dur="15s" repeatCount="indefinite" path="'+flow1+'"/></circle>'
-      +'<circle r="3.5" fill="#34d399" opacity="0.45"><animateMotion dur="15s" begin="7.5s" repeatCount="indefinite" path="'+flow1+'"/></circle>'
-      +'<circle r="3.5" fill="#006DF9" opacity="0.35"><animateMotion dur="19s" begin="3s" repeatCount="indefinite" path="'+flow2+'"/></circle>'
-      +'<g transform="translate(95,165) rotate(-6)"><g style="animation:rrFloat2 9s ease-in-out infinite">'
-      +'<rect width="190" height="124" rx="14" '+cardFill+' stroke="'+OL(0.08)+'"/>'
-      +'<circle cx="24" cy="26" r="8" fill="#ef4444" opacity="0.5"/>'
-      +'<path d="M24 22.5v4.5 M24 29.6v0.2" stroke="#fef2f2" stroke-width="1.8" stroke-linecap="round"/>'
-      +'<text x="40" y="30" font-family="Inter,system-ui" font-size="11" font-weight="600" fill="'+OL(0.5)+'">INV-2041 · Stripe</text>'
-      +'<rect x="128" y="16" width="46" height="20" rx="10" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.28)"/>'
-      +'<text x="151" y="30" text-anchor="middle" font-family="Inter,system-ui" font-size="10" font-weight="700" fill="#ef4444" fill-opacity="0.85">Failed</text>'
-      +'<text x="20" y="64" font-family="Inter,system-ui" font-size="18" font-weight="700" fill="'+OL(0.75)+'">$197.00</text>'
-      +'<text x="20" y="82" font-family="Inter,system-ui" font-size="10.5" fill="'+OL(0.42)+'">Insufficient funds · Visa ··4242</text>'
-      +'<rect x="20" y="93" width="96" height="19" rx="9.5" fill="rgba(0,109,249,0.14)"/>'
-      +'<text x="68" y="106" text-anchor="middle" font-family="Inter,system-ui" font-size="10" font-weight="600" fill="rgba(0,109,249,0.9)">Retry #2 · in 3h</text>'
-      +'</g></g>'
-      +'<g transform="translate(1320,585) rotate(5)"><g style="animation:rrFloat 10s ease-in-out 1s infinite">'
-      +'<rect width="190" height="124" rx="14" '+cardFill+' stroke="'+OL(0.08)+'"/>'
-      +'<circle cx="24" cy="26" r="8" fill="#22c55e" opacity="0.5"/>'
-      +'<path d="M20.5 26 l2.5 2.5 l5 -5.5" fill="none" stroke="#f0fdf4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'<text x="40" y="30" font-family="Inter,system-ui" font-size="11" font-weight="600" fill="'+OL(0.5)+'">Recovery rate</text>'
-      +'<text x="20" y="66" font-family="Inter,system-ui" font-size="21" font-weight="700" fill="'+OL(0.78)+'">87.4%</text>'
-      +'<rect x="92" y="50" width="42" height="18" rx="9" fill="rgba(34,197,94,0.12)"/>'
-      +'<text x="113" y="63" text-anchor="middle" font-family="Inter,system-ui" font-size="10" font-weight="700" fill="#22c55e" fill-opacity="0.9">+12%</text>'
-      +'<polyline points="20,106 50,98 76,102 104,84 132,90 170,66" fill="none" stroke="#22c55e" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round"/>'
-      +'<circle cx="170" cy="66" r="3.2" fill="#22c55e" opacity="0.75"/>'
-      +'</g></g>'
-      +'<g opacity="'+(_L?0.5:0.4)+'">'
-      +'<circle cx="1245" cy="150" r="15" fill="none" stroke="#22c55e" stroke-opacity="0.45" stroke-width="2"/><path d="M1238 150 l5 5 l9 -10" fill="none" stroke="#22c55e" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'<circle cx="330" cy="740" r="13" fill="none" stroke="#ef4444" stroke-opacity="0.4" stroke-width="2"/><path d="M325 735 l10 10 M335 735 l-10 10" stroke="#ef4444" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>'
-      +'<text x="205" y="450" font-family="Inter,system-ui" font-size="20" font-weight="700" fill="rgba(0,109,249,0.30)">$</text>'
-      +'<text x="1420" y="330" font-family="Inter,system-ui" font-size="24" font-weight="700" fill="rgba(0,109,249,0.25)">$</text>'
-      +'</g>'
       +'</svg>';
     shell.appendChild(bgsvg);
-    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:40px 24px;box-sizing:border-box');
+    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:28px 24px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
-    var logo = el('div','display:flex;align-items:center;justify-content:center;margin-bottom:28px;color:'+TEXT+';animation:rrFadeUp .6s ease both');
+    var logo = el('div','display:flex;align-items:center;justify-content:center;margin-bottom:24px;color:'+TEXT+';animation:rrFadeUp .6s ease both');
     logo.innerHTML = '__RR_LOGO_SVG__';
-    // hero illustration — sits just below the logo, gently floating, with
-    // recovery chips echoing the live pipeline inside the dashboard
-    var art = el('div','position:relative;width:100%;max-width:420px;margin:0 auto 28px;animation:rrFadeUp .6s ease .08s both, rrFloat 7s ease-in-out 1.2s infinite');
+    // hero illustration — static, framed, flanked by two data cards that
+    // mirror real dashboard content (composition, not decoration)
+    var art = el('div','position:relative;width:100%;max-width:360px;margin:0 auto 24px;animation:rrFadeUp .6s ease .08s both');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
-    img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px;box-shadow:0 24px 60px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)');
+    img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px;border:1px solid '+BORDER+';box-shadow:0 16px 44px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)');
     art.appendChild(img);
-    var chipCss = 'position:absolute;display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';box-shadow:0 10px 26px '+(_L?'rgba(2,6,23,0.12)':'rgba(0,0,0,0.5)')+';font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;';
-    var chip1 = el('div', chipCss+'top:14px;right:-26px;color:#16a34a;animation:rrFloat2 6s ease-in-out infinite',
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> $458 recovered');
-    var chip2 = el('div', chipCss+'bottom:16px;left:-30px;color:'+(_L?'#3b4658':'#aeb6c2')+';animation:rrFloat 8s ease-in-out .8s infinite',
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+BRAND+'" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Retry scheduled · 3h');
-    art.appendChild(chip1); art.appendChild(chip2);
+    var cardBase = 'position:absolute;background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:14px;box-shadow:0 12px 32px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)')+';padding:14px 16px;text-align:left;pointer-events:none;';
+    var card1 = el('div', cardBase+'left:-162px;bottom:-22px;width:186px;box-sizing:border-box');
+    card1.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><span style="font-size:11px;font-weight:600;color:'+GRAY+'">INV-2041 · Stripe</span><span style="font-size:10px;font-weight:700;color:#ef4444;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.22);border-radius:999px;padding:2px 8px">Failed</span></div>'
+      +'<div style="font-size:17px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
+      +'<div style="font-size:10.5px;color:'+GRAY2+';margin:3px 0 10px">Insufficient funds · Visa ··4242</div>'
+      +'<span style="display:inline-block;font-size:10px;font-weight:600;color:'+BRAND+';background:rgba(0,109,249,0.10);border-radius:999px;padding:3px 9px">Retry #2 · in 3h</span>';
+    var card2 = el('div', cardBase+'right:-150px;top:-38px;width:180px;box-sizing:border-box');
+    card2.innerHTML =
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e"></span><span style="font-size:11px;font-weight:600;color:'+GRAY+'">Recovery rate</span></div>'
+      +'<div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:20px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">87.4%</span><span style="font-size:10px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.10);border-radius:999px;padding:2px 7px">+12%</span></div>'
+      +'<svg width="148" height="34" viewBox="0 0 148 34" style="display:block;margin-top:8px"><polyline points="2,28 28,22 52,25 76,12 102,17 146,4" fill="none" stroke="#22c55e" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/></svg>';
+    art.appendChild(card1); art.appendChild(card2);
     // header + sub-header sit below the illustration, on a wider text column
-    var h1 = el('h1','font-size:42px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 16px;text-align:center');
+    var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 14px;text-align:center');
     h1.innerHTML = 'Recover failed payments with <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">intelligent retries</span>';
-    var p = el('p','font-size:16px;color:'+GRAY+';line-height:1.65;margin:0 0 40px;text-align:center;max-width:560px');
+    var p = el('p','font-size:16px;color:'+GRAY+';line-height:1.6;margin:0 0 26px;text-align:center;max-width:560px');
     p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
-    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 12px 32px rgba(0,109,249,0.30);transition:transform .15s ease,box-shadow .15s ease',
+    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(0,109,249,0.25);transition:transform .15s ease,box-shadow .15s ease',
       function(){ stepIndex=0; render(); });
-    cta.onmouseenter = function(){ cta.style.transform='translateY(-2px)'; cta.style.boxShadow='0 16px 40px rgba(0,109,249,0.40)'; };
-    cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 12px 32px rgba(0,109,249,0.30)'; };
+    cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };
+    cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 8px 20px rgba(0,109,249,0.25)'; };
+    var eyebrow = el('div','font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:'+GRAY2+';margin-bottom:14px');
+    eyebrow.textContent = 'Revenue Recovery';
     var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
-    inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
+    inner.appendChild(eyebrow); inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
+    // trust metrics row
+    var stats = el('div','display:flex;align-items:center;justify-content:center;margin-top:24px');
+    [['87.4%','recovery rate'],['$2.1M','recovered this quarter'],['−38%','involuntary churn']].forEach(function(s,i){
+      var it = el('div','padding:0 26px;text-align:center'+(i?';border-left:1px solid '+BORDER:''));
+      it.innerHTML = '<div style="font-size:18px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">'+s[0]+'</div><div style="font-size:11.5px;color:'+GRAY2+';margin-top:2px">'+s[1]+'</div>';
+      stats.appendChild(it);
+    });
+    inner.appendChild(stats);
     content.appendChild(logo); content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
     shell.appendChild(wrap);

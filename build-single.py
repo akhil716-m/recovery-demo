@@ -389,26 +389,25 @@ ONBOARDING = """<script>
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
-    var logo = el('div','display:flex;align-items:center;gap:10px;margin-bottom:36px');
-    logo.innerHTML = '<div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#006DF9,#3399FF)"></div>'
-      +'<span style="font-size:16px;font-weight:700;color:'+TEXT+'">Hyperswitch</span>'
-      +'<span style="font-size:11px;color:'+BRAND+';background:rgba(0,109,249,0.1);border:1px solid rgba(0,109,249,0.2);border-radius:6px;padding:2px 8px;font-weight:600">Revenue Recovery</span>';
-    var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 16px;text-align:center');
-    h1.innerHTML = 'Recover failed payments<br>with <span style="color:'+BRAND+'">intelligent retries</span>';
-    var p = el('p','font-size:15px;color:'+GRAY+';line-height:1.65;margin:0 0 40px;text-align:center;max-width:420px');
-    p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
-    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit',
-      function(){ stepIndex=0; render(); });
-    var inner = el('div','text-align:center;max-width:460px');
-    inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
-    // hero illustration — Failed → recovery engine → Success
-    var art = el('div','width:100%;max-width:480px;margin:40px auto 0');
+    var logo = el('div','display:flex;align-items:center;justify-content:center;margin-bottom:28px;color:'+TEXT);
+    logo.innerHTML = '__RR_LOGO_SVG__';
+    // hero illustration — sits just below the logo
+    var art = el('div','width:100%;max-width:420px;margin:0 auto 28px');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
     img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px';
     art.appendChild(img);
-    content.appendChild(logo); content.appendChild(inner); content.appendChild(art);
+    // header + sub-header sit below the illustration, on a wider text column
+    var h1 = el('h1','font-size:42px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 16px;text-align:center');
+    h1.innerHTML = 'Recover failed payments with <span style="color:'+BRAND+'">intelligent retries</span>';
+    var p = el('p','font-size:16px;color:'+GRAY+';line-height:1.65;margin:0 0 40px;text-align:center;max-width:560px');
+    p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
+    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit',
+      function(){ stepIndex=0; render(); });
+    var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px');
+    inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
+    content.appendChild(logo); content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
     shell.appendChild(wrap);
   }
@@ -794,6 +793,20 @@ _hero_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 
 with open(_hero_path, 'rb') as _hf:
     _hero_uri = 'data:image/png;base64,' + base64.b64encode(_hf.read()).decode('ascii')
 ONBOARDING = ONBOARDING.replace('__RR_HERO_SRC__', _hero_uri)
+
+# Inline the Juspay wordmark, made theme-aware: the "Juspay" text ships as
+# fill="white" (built for a dark bg) so it would vanish on our light default —
+# map it to currentColor (driven by the logo container's colour), and drop the
+# secondary word's light-grey to a neutral that reads on both themes. Collapse
+# whitespace so the markup is safe inside a single-quoted JS string.
+_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'juspay-logo.svg')
+with open(_logo_path, 'r', encoding='utf-8') as _lf:
+    _logo_svg = _lf.read()
+_logo_svg = _logo_svg.replace('fill="white"', 'fill="currentColor"').replace('#CBCACF', '#8a8f98')
+_logo_svg = re.sub(r'\s+', ' ', _logo_svg).strip()
+# give it a consistent render height regardless of the file's intrinsic px size
+_logo_svg = _logo_svg.replace('<svg width="228" height="25"', '<svg width="228" height="25" style="height:26px;width:auto;display:block"', 1)
+ONBOARDING = ONBOARDING.replace('__RR_LOGO_SVG__', _logo_svg)
 
 html = html.replace('</body>', ONBOARDING + '</body>', 1)
 

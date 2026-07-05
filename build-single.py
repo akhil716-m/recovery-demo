@@ -75,7 +75,7 @@ html = html.replace('</head>', '<style>main.space-y-6>div:nth-child(2){margin-to
 ONBOARDING = """<script>
 (function(){
   // Landing + onboarding respect the persisted theme (no toggle here yet).
-  var _L = (function(){ try{ return localStorage.getItem('rrTheme')==='light'; }catch(e){ return false; } })();
+  var _L = (function(){ try{ return localStorage.getItem('rrTheme')!=='dark'; }catch(e){ return true; } })();
   function OL(a){ return (_L?'rgba(15,23,42,':'rgba(255,255,255,')+a+')'; }
   var BRAND='#006DF9',
       BG    = _L?'#f6f7f9':'#08090a',
@@ -98,7 +98,7 @@ ONBOARDING = """<script>
   // React's hydration resets <html>'s className, wiping the rr-light class the
   // boot script added. Re-enforce the persisted theme and keep it enforced.
   function rrEnsureTheme(){
-    var want; try{ want = localStorage.getItem('rrTheme')==='light'; }catch(e){ want=false; }
+    var want; try{ want = localStorage.getItem('rrTheme')!=='dark'; }catch(e){ want=true; }
     var has = document.documentElement.classList.contains('rr-light');
     if(want && !has) document.documentElement.classList.add('rr-light');
     else if(!want && has) document.documentElement.classList.remove('rr-light');
@@ -132,7 +132,7 @@ ONBOARDING = """<script>
     exit.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
     exit.onmouseenter = function(){ exit.style.color=TEXT; };
     exit.onmouseleave = function(){ exit.style.color=GRAY2; };
-    exit.onclick = function(){ localStorage.removeItem('rrSetupV2'); location.reload(); };
+    exit.onclick = function(){ localStorage.removeItem('rrSetupV2'); try{ sessionStorage.removeItem('rrInApp'); }catch(e){} location.reload(); };
     profile.appendChild(exit);
   }
 
@@ -330,7 +330,12 @@ ONBOARDING = """<script>
     window.rrFixInline();
   }
 
-  if(localStorage.getItem('rrSetupV2')){
+  // Show the landing page on every fresh URL entry. We only jump straight to
+  // the dashboard when the user has entered the app within this tab session
+  // (set on skip/complete/explore below), so reopening the URL always lands
+  // on the hero first.
+  var _inApp = (function(){ try{ return sessionStorage.getItem('rrInApp')==='1'; }catch(e){ return false; } })();
+  if(localStorage.getItem('rrSetupV2') && _inApp){
     addExitBtn(); watchExitBtn(); watchGradients();
     setTimeout(window.rrFixGradients, 50);
     setTimeout(window.rrFixGradients, 200);
@@ -416,6 +421,7 @@ ONBOARDING = """<script>
     var skipBtn = btn('Skip setup','font-size:13px;font-weight:600;color:'+GRAY+';background:none;border:none;cursor:pointer;padding:6px 4px',
       function(){
         localStorage.setItem('rrSetupV2','1');
+        try{ sessionStorage.setItem('rrInApp','1'); }catch(e){}
         try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
         location.reload();
       });
@@ -752,6 +758,7 @@ ONBOARDING = """<script>
       });
       container.appendChild(primaryBtn('Start exploring', false, function(){
         localStorage.setItem('rrSetupV2','1');
+        try{ sessionStorage.setItem('rrInApp','1'); }catch(e){}
         try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
         location.reload();
       }));
@@ -2113,7 +2120,7 @@ _theme_rules.append('html.rr-light body{background:#ffffff;color-scheme:light}')
 
 _THEME_CSS = '<style id="rr-theme-light">' + ''.join(_theme_rules) + '</style>'
 # Apply the persisted theme before first paint to avoid a flash.
-_THEME_BOOT = '<script>try{if(localStorage.getItem("rrTheme")==="light")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
+_THEME_BOOT = '<script>try{if(localStorage.getItem("rrTheme")!=="dark")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
 html = html.replace('</head>', _THEME_CSS + _THEME_BOOT + '</head>', 1)
 
 # Write the built page to BOTH names:

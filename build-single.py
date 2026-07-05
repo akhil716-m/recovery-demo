@@ -15,7 +15,10 @@ def read(rel_href):
     path = path.split('?')[0]
     return open(os.path.join(ROOT, path), encoding='utf-8').read()
 
-with open(os.path.join(ROOT, 'index.html'), encoding='utf-8') as f:
+# Read from the pristine Next.js export (index.orig.html). index.html itself
+# is a BUILD OUTPUT (see bottom of file) so the host serves our enhanced,
+# self-contained page at "/" -- reading from it would double-inject on rebuild.
+with open(os.path.join(ROOT, 'index.orig.html'), encoding='utf-8') as f:
     html = f.read()
 
 # 0. Patch stale pre-rendered HTML in index.html so it matches our JS changes.
@@ -2113,9 +2116,14 @@ _THEME_CSS = '<style id="rr-theme-light">' + ''.join(_theme_rules) + '</style>'
 _THEME_BOOT = '<script>try{if(localStorage.getItem("rrTheme")==="light")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
 html = html.replace('</head>', _THEME_CSS + _THEME_BOOT + '</head>', 1)
 
-out = os.path.join(ROOT, 'recovery-demo.html')
-with open(out, 'w', encoding='utf-8') as f:
-    f.write(html)
+# Write the built page to BOTH names:
+#  - recovery-demo.html: kept for the local preview server / direct links
+#  - index.html: what the static host (Vercel) serves at "/", so the deployed
+#    site gets our enhanced page with no rewrite needed
+for name in ('recovery-demo.html', 'index.html'):
+    out = os.path.join(ROOT, name)
+    with open(out, 'w', encoding='utf-8') as f:
+        f.write(html)
 
-size_kb = os.path.getsize(out) / 1024
-print(f"✓  recovery-demo.html  ({size_kb:.0f} KB)")
+size_kb = os.path.getsize(os.path.join(ROOT, 'recovery-demo.html')) / 1024
+print(f"✓  recovery-demo.html + index.html  ({size_kb:.0f} KB)")

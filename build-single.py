@@ -392,7 +392,8 @@ ONBOARDING = """<script>
         +'@keyframes rrFloat2{0%,100%{transform:translateY(-5px)}50%{transform:translateY(7px)}}'
         +'@keyframes rrDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(46px,-32px) scale(1.08)}}'
         +'@keyframes rrDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-52px,26px) scale(1.06)}}'
-        +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}';
+        +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}'
+        +'@keyframes rrDash{to{stroke-dashoffset:-420}}';
       document.head.appendChild(st);
     }
     shell.style.padding = '0';
@@ -404,6 +405,43 @@ ONBOARDING = """<script>
     var blob1 = el('div','position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(85px);background:'+(_L?'rgba(0,109,249,0.10)':'rgba(0,109,249,0.15)')+';top:-160px;left:-120px;animation:rrDrift 18s ease-in-out infinite;pointer-events:none');
     var blob2 = el('div','position:absolute;width:460px;height:460px;border-radius:50%;filter:blur(95px);background:'+(_L?'rgba(51,153,255,0.12)':'rgba(37,99,235,0.13)')+';bottom:-140px;right:-100px;animation:rrDrift2 22s ease-in-out infinite;pointer-events:none');
     shell.appendChild(blob1); shell.appendChild(blob2);
+    // product-flavoured backdrop: dashboard grid, ghost invoice cards, and
+    // dashed retry paths with payments travelling toward recovery
+    var flow1 = 'M -80 640 C 260 560, 520 720, 820 650 C 1120 580, 1320 520, 1720 600';
+    var flow2 = 'M 1700 250 C 1350 320, 1080 200, 800 260 C 520 320, 300 240, -60 300';
+    var cardFill = _L ? 'fill="#ffffff" fill-opacity="0.65"' : 'fill="#11161d" fill-opacity="0.55"';
+    var bgsvg = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden');
+    bgsvg.innerHTML =
+      '<svg width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'
+      +'<defs><pattern id="rr-grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="'+OL(_L?0.045:0.055)+'" stroke-width="1"/></pattern></defs>'
+      +'<rect width="1600" height="900" fill="url(#rr-grid)"/>'
+      +'<path d="'+flow1+'" fill="none" stroke="rgba(0,109,249,'+(_L?0.22:0.28)+')" stroke-width="1.5" stroke-dasharray="5 9" style="animation:rrDash 30s linear infinite"/>'
+      +'<path d="'+flow2+'" fill="none" stroke="'+OL(0.10)+'" stroke-width="1.5" stroke-dasharray="4 10" style="animation:rrDash 40s linear infinite"/>'
+      +'<circle r="4.5" fill="#006DF9" opacity="0.5"><animateMotion dur="15s" repeatCount="indefinite" path="'+flow1+'"/></circle>'
+      +'<circle r="3.5" fill="#34d399" opacity="0.45"><animateMotion dur="15s" begin="7.5s" repeatCount="indefinite" path="'+flow1+'"/></circle>'
+      +'<circle r="3.5" fill="#006DF9" opacity="0.35"><animateMotion dur="19s" begin="3s" repeatCount="indefinite" path="'+flow2+'"/></circle>'
+      +'<g transform="translate(105,170) rotate(-6)"><g style="animation:rrFloat2 9s ease-in-out infinite">'
+      +'<rect width="170" height="112" rx="14" '+cardFill+' stroke="'+OL(0.08)+'"/>'
+      +'<circle cx="26" cy="28" r="9" fill="#ef4444" opacity="0.35"/>'
+      +'<rect x="44" y="22" width="72" height="9" rx="4.5" fill="'+OL(0.10)+'"/>'
+      +'<rect x="20" y="52" width="130" height="8" rx="4" fill="'+OL(0.07)+'"/>'
+      +'<rect x="20" y="70" width="96" height="8" rx="4" fill="'+OL(0.07)+'"/>'
+      +'<rect x="20" y="88" width="58" height="8" rx="4" fill="rgba(0,109,249,0.30)"/>'
+      +'</g></g>'
+      +'<g transform="translate(1330,590) rotate(5)"><g style="animation:rrFloat 10s ease-in-out 1s infinite">'
+      +'<rect width="170" height="112" rx="14" '+cardFill+' stroke="'+OL(0.08)+'"/>'
+      +'<circle cx="26" cy="28" r="9" fill="#22c55e" opacity="0.4"/>'
+      +'<rect x="44" y="22" width="60" height="9" rx="4.5" fill="'+OL(0.10)+'"/>'
+      +'<polyline points="20,92 48,80 72,86 100,64 126,70 150,48" fill="none" stroke="#22c55e" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>'
+      +'</g></g>'
+      +'<g opacity="'+(_L?0.5:0.4)+'">'
+      +'<circle cx="1245" cy="150" r="15" fill="none" stroke="#22c55e" stroke-opacity="0.45" stroke-width="2"/><path d="M1238 150 l5 5 l9 -10" fill="none" stroke="#22c55e" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<circle cx="330" cy="740" r="13" fill="none" stroke="#ef4444" stroke-opacity="0.4" stroke-width="2"/><path d="M325 735 l10 10 M335 735 l-10 10" stroke="#ef4444" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>'
+      +'<text x="205" y="450" font-family="Inter,system-ui" font-size="20" font-weight="700" fill="rgba(0,109,249,0.30)">$</text>'
+      +'<text x="1420" y="330" font-family="Inter,system-ui" font-size="24" font-weight="700" fill="rgba(0,109,249,0.25)">$</text>'
+      +'</g>'
+      +'</svg>';
+    shell.appendChild(bgsvg);
     var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:40px 24px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.

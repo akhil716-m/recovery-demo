@@ -385,27 +385,55 @@ ONBOARDING = """<script>
 
   /* ── landing ── */
   function renderLanding(){
-    var wrap = el('div','flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:40px 24px;box-sizing:border-box');
+    // keyframes for the landing motion (injected once)
+    if(!document.getElementById('rr-landing-anim')){
+      var st = document.createElement('style'); st.id = 'rr-landing-anim';
+      st.textContent = '@keyframes rrFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}'
+        +'@keyframes rrFloat2{0%,100%{transform:translateY(-5px)}50%{transform:translateY(7px)}}'
+        +'@keyframes rrDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(46px,-32px) scale(1.08)}}'
+        +'@keyframes rrDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-52px,26px) scale(1.06)}}'
+        +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}';
+      document.head.appendChild(st);
+    }
+    shell.style.padding = '0';
+    // layered gradient backdrop instead of a flat wash
+    shell.style.background = _L
+      ? 'radial-gradient(1100px 560px at 18% -12%, rgba(0,109,249,0.10), transparent 60%), radial-gradient(950px 520px at 84% 112%, rgba(51,153,255,0.12), transparent 60%), linear-gradient(180deg,#fbfcfe 0%,#eef3fb 100%)'
+      : 'radial-gradient(1100px 560px at 18% -12%, rgba(0,109,249,0.20), transparent 60%), radial-gradient(950px 520px at 84% 112%, rgba(37,99,235,0.14), transparent 60%), linear-gradient(180deg,#08090a 0%,#0b1120 100%)';
+    // drifting glow blobs behind the content
+    var blob1 = el('div','position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(85px);background:'+(_L?'rgba(0,109,249,0.10)':'rgba(0,109,249,0.15)')+';top:-160px;left:-120px;animation:rrDrift 18s ease-in-out infinite;pointer-events:none');
+    var blob2 = el('div','position:absolute;width:460px;height:460px;border-radius:50%;filter:blur(95px);background:'+(_L?'rgba(51,153,255,0.12)':'rgba(37,99,235,0.13)')+';bottom:-140px;right:-100px;animation:rrDrift2 22s ease-in-out infinite;pointer-events:none');
+    shell.appendChild(blob1); shell.appendChild(blob2);
+    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:40px 24px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
-    var logo = el('div','display:flex;align-items:center;justify-content:center;margin-bottom:28px;color:'+TEXT);
+    var logo = el('div','display:flex;align-items:center;justify-content:center;margin-bottom:28px;color:'+TEXT+';animation:rrFadeUp .6s ease both');
     logo.innerHTML = '__RR_LOGO_SVG__';
-    // hero illustration — sits just below the logo
-    var art = el('div','width:100%;max-width:420px;margin:0 auto 28px');
+    // hero illustration — sits just below the logo, gently floating, with
+    // recovery chips echoing the live pipeline inside the dashboard
+    var art = el('div','position:relative;width:100%;max-width:420px;margin:0 auto 28px;animation:rrFadeUp .6s ease .08s both, rrFloat 7s ease-in-out 1.2s infinite');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
-    img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px';
+    img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px;box-shadow:0 24px 60px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)');
     art.appendChild(img);
+    var chipCss = 'position:absolute;display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';box-shadow:0 10px 26px '+(_L?'rgba(2,6,23,0.12)':'rgba(0,0,0,0.5)')+';font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;';
+    var chip1 = el('div', chipCss+'top:14px;right:-26px;color:#16a34a;animation:rrFloat2 6s ease-in-out infinite',
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> $458 recovered');
+    var chip2 = el('div', chipCss+'bottom:16px;left:-30px;color:'+(_L?'#3b4658':'#aeb6c2')+';animation:rrFloat 8s ease-in-out .8s infinite',
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+BRAND+'" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Retry scheduled · 3h');
+    art.appendChild(chip1); art.appendChild(chip2);
     // header + sub-header sit below the illustration, on a wider text column
     var h1 = el('h1','font-size:42px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 16px;text-align:center');
-    h1.innerHTML = 'Recover failed payments with <span style="color:'+BRAND+'">intelligent retries</span>';
+    h1.innerHTML = 'Recover failed payments with <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">intelligent retries</span>';
     var p = el('p','font-size:16px;color:'+GRAY+';line-height:1.65;margin:0 0 40px;text-align:center;max-width:560px');
     p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
-    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit',
+    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 12px 32px rgba(0,109,249,0.30);transition:transform .15s ease,box-shadow .15s ease',
       function(){ stepIndex=0; render(); });
-    var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px');
+    cta.onmouseenter = function(){ cta.style.transform='translateY(-2px)'; cta.style.boxShadow='0 16px 40px rgba(0,109,249,0.40)'; };
+    cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 12px 32px rgba(0,109,249,0.30)'; };
+    var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
     inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
     content.appendChild(logo); content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
@@ -414,7 +442,8 @@ ONBOARDING = """<script>
 
   /* ── wizard ── */
   function renderWizard(){
-    // card wrapper — inset from edges on all sides
+    // card wrapper — inset from edges on all sides (reset the landing gradient)
+    shell.style.background = BG;
     shell.style.padding = '32px';
     var card = el('div','display:flex;flex-direction:column;width:100%;height:100%;border-radius:16px;border:1px solid '+BORDER+';overflow:hidden;box-sizing:border-box');
 

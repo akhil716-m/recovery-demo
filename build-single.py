@@ -385,8 +385,11 @@ ONBOARDING = """<script>
 
   /* ── landing ── */
   function renderLanding(){
-    var wrap = el('div','flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center');
-    var logo = el('div','display:flex;align-items:center;gap:10px;margin-bottom:48px');
+    var wrap = el('div','flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:40px 24px;box-sizing:border-box');
+    // margin:auto centres the column vertically when it fits, yet lets it
+    // scroll (instead of clipping the top) on short viewports.
+    var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
+    var logo = el('div','display:flex;align-items:center;gap:10px;margin-bottom:36px');
     logo.innerHTML = '<div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#006DF9,#3399FF)"></div>'
       +'<span style="font-size:16px;font-weight:700;color:'+TEXT+'">Hyperswitch</span>'
       +'<span style="font-size:11px;color:'+BRAND+';background:rgba(0,109,249,0.1);border:1px solid rgba(0,109,249,0.2);border-radius:6px;padding:2px 8px;font-weight:600">Revenue Recovery</span>';
@@ -396,9 +399,17 @@ ONBOARDING = """<script>
     p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
     var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit',
       function(){ stepIndex=0; render(); });
-    var inner = el('div','text-align:center;max-width:460px;padding:0 24px');
+    var inner = el('div','text-align:center;max-width:460px');
     inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
-    wrap.appendChild(logo); wrap.appendChild(inner);
+    // hero illustration — Failed → recovery engine → Success
+    var art = el('div','width:100%;max-width:480px;margin:40px auto 0');
+    var img = document.createElement('img');
+    img.src = '__RR_HERO_SRC__';
+    img.alt = 'Failed payments recovered through the recovery engine';
+    img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px';
+    art.appendChild(img);
+    content.appendChild(logo); content.appendChild(inner); content.appendChild(art);
+    wrap.appendChild(content);
     shell.appendChild(wrap);
   }
 
@@ -775,6 +786,14 @@ _onb_head, _onb_body = ONBOARDING.split(_onb_marker, 1)
 _onb_body = re.sub(r'rgba\(255,255,255,([0-9.]+)\)', r"'+OL(\1)+'", _onb_body)
 _onb_body = _onb_body.replace('#13181f', "'+PANEL+'")
 ONBOARDING = _onb_head + _onb_marker + _onb_body
+
+# Embed the landing hero illustration as a base64 data URI so the single-file
+# build stays self-contained (no external asset request on the deployed site).
+import base64
+_hero_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'revenue-recovery-hero.png')
+with open(_hero_path, 'rb') as _hf:
+    _hero_uri = 'data:image/png;base64,' + base64.b64encode(_hf.read()).decode('ascii')
+ONBOARDING = ONBOARDING.replace('__RR_HERO_SRC__', _hero_uri)
 
 html = html.replace('</body>', ONBOARDING + '</body>', 1)
 

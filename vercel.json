@@ -6,13 +6,13 @@
     {
       "source": "/",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-store" }
       ]
     },
     {
       "source": "/(index|recovery-demo).html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-store" }
       ]
     }
   ]

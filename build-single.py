@@ -72,6 +72,20 @@ html = re.sub(r'<script>document\.documentElement\.classList\.add\("rr-booting"\
 # a uniform gap, so override the 3rd+ children specifically).
 html = html.replace('</head>', '<style>main.space-y-6>div:nth-child(2){margin-top:32px!important}main.space-y-6>div:nth-child(n+3){margin-top:40px!important}</style></head>', 1)
 
+# Flatten the Live Recovery Pipeline invoice rows. Each row ships as its own
+# bordered, filled card (`mx-2 my-1 rounded-md border bg-[#0f1012]`) nested
+# inside the column inside the panel — box-in-box-in-box. Render them as a
+# flat list divided by hairlines instead; the coloured accent bar and hover
+# state carry the row structure.
+_flat_rows = ('<style id="rr-flat-pipeline">'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]{background:transparent!important;border:0!important;border-radius:8px;margin:0 8px!important}'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:not(:last-child){border-bottom:1px solid rgba(255,255,255,0.055)!important;border-radius:0}'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:hover{background:rgba(255,255,255,0.035)!important}'
+  'html.rr-light div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:not(:last-child){border-bottom:1px solid rgba(15,23,42,0.08)!important}'
+  'html.rr-light div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:hover{background:rgba(15,23,42,0.04)!important}'
+  '</style>')
+html = html.replace('</head>', _flat_rows + '</head>', 1)
+
 ONBOARDING = """<script>
 (function(){
   // Landing + onboarding respect the persisted theme (no toggle here yet).

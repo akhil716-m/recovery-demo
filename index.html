@@ -2341,6 +2341,23 @@
     }
   };
 
-  if(localStorage.getItem('rrSetupV2')) setTimeout(window.rrAddSimulationNav, 300);
+  // A single fixed-delay setTimeout here used to be a race: if React hadn't
+  // mounted the nav bar by the 300ms mark (slower device, cold/no-store
+  // load, etc.) simBtn stayed null and Live Flow silently never got added
+  // for that page view, with nothing ever retrying it. Watch for the nav
+  // bar the same way the other injected fixups in this file do, so it
+  // self-heals regardless of how long hydration takes.
+  if(localStorage.getItem('rrSetupV2')){
+    (function watchSimNav(){
+      var nav = document.querySelector('nav');
+      if(!nav){ setTimeout(watchSimNav, 100); return; }
+      var t; new MutationObserver(function(){ clearTimeout(t); t = setTimeout(window.rrAddSimulationNav, 60); })
+        .observe(nav, {childList:true, subtree:true});
+      window.rrAddSimulationNav();
+    })();
+    setTimeout(window.rrAddSimulationNav, 300);
+    setTimeout(window.rrAddSimulationNav, 800);
+    setTimeout(window.rrAddSimulationNav, 1500);
+  }
 })();
 </script></body></html>

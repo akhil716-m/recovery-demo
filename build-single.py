@@ -879,7 +879,7 @@ with open(_logo_path, 'r', encoding='utf-8') as _lf:
 _logo_svg = _logo_svg.replace('fill="white"', 'fill="currentColor"').replace('#CBCACF', '#8a8f98')
 _logo_svg = re.sub(r'\s+', ' ', _logo_svg).strip()
 # give it a consistent render height regardless of the file's intrinsic px size
-_logo_svg = _logo_svg.replace('<svg width="228" height="25"', '<svg width="228" height="25" style="height:26px;width:auto;display:block"', 1)
+_logo_svg = _logo_svg.replace('<svg width="228" height="25"', '<svg width="228" height="25" style="height:20px;width:auto;display:block"', 1)
 ONBOARDING = ONBOARDING.replace('__RR_LOGO_SVG__', _logo_svg)
 
 html = html.replace('</body>', ONBOARDING + '</body>', 1)

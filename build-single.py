@@ -72,6 +72,10 @@ html = re.sub(r'<script>document\.documentElement\.classList\.add\("rr-booting"\
 # a uniform gap, so override the 3rd+ children specifically).
 html = html.replace('</head>', '<style>main.space-y-6>div:nth-child(2){margin-top:32px!important}main.space-y-6>div:nth-child(n+3){margin-top:40px!important}</style></head>', 1)
 
+# "Failures received" wraps to two lines ("FAILURES"/"RECEIVED") in its narrow
+# stat column next to the single-word "Soft"/"Hard" labels — shorten to match.
+html = html.replace('Failures received', 'Received')
+
 # Flatten the Live Recovery Pipeline invoice rows. Each row ships as its own
 # bordered, filled card (`mx-2 my-1 rounded-md border bg-[#0f1012]`) nested
 # inside the column inside the panel — box-in-box-in-box. Render them as a

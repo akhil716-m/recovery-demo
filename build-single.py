@@ -456,25 +456,30 @@ ONBOARDING = """<script>
     // invoice enters failed on the left, passes through the Juspay retry
     // engine, and exits recovered on the right.
     var art = el('div','position:relative;width:100%;max-width:640px;margin:0 auto 34px;animation:rrFadeUp .6s ease .08s both');
-    // the panel's washes mirror the story: a red tint under the failed card,
-    // green under the recovered one, and a blue glow radiating from the engine
-    var panel = el('div','position:relative;border-radius:22px;padding:120px 34px;box-sizing:border-box;background:'
+    // no container box: the story washes (red under the failed card, green
+    // under the recovered one, blue radiating from the engine) live on a
+    // bleed layer that extends past the composition and fades out on all
+    // four edges, blending seamlessly into the page background.
+    var panel = el('div','position:relative;padding:120px 34px;box-sizing:border-box');
+    var glow = el('div','position:absolute;top:-70px;bottom:-70px;left:-200px;right:-200px;pointer-events:none;background:'
       +(_L
-        ? 'radial-gradient(300px 200px at 16% 66%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(300px 200px at 86% 34%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(380px 260px at 50% 42%, rgba(0,109,249,0.13), transparent 72%), linear-gradient(180deg,#e7f0fe,#d5e5fc)'
-        : 'radial-gradient(300px 200px at 16% 66%, rgba(239,68,68,0.10), transparent 70%), radial-gradient(300px 200px at 86% 34%, rgba(34,197,94,0.10), transparent 70%), radial-gradient(380px 260px at 50% 42%, rgba(0,109,249,0.22), transparent 72%), linear-gradient(180deg,#0d1522,#101b2e)')
-      +';border:1px solid '+(_L?'rgba(15,23,42,0.04)':OL(0.06))+';overflow:hidden');
+        ? 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(460px 320px at 50% 46%, rgba(0,109,249,0.13), transparent 72%), radial-gradient(closest-side, #dde9fc 30%, rgba(221,233,252,0) 100%)'
+        : 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.09), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.09), transparent 70%), radial-gradient(460px 320px at 50% 46%, rgba(0,109,249,0.20), transparent 72%), radial-gradient(closest-side, #0e1a2e 30%, rgba(14,26,46,0) 100%)')
+      +';-webkit-mask-image:radial-gradient(ellipse 72% 68% at 50% 50%, #000 38%, transparent 76%);mask-image:radial-gradient(ellipse 72% 68% at 50% 50%, #000 38%, transparent 76%)');
+    panel.appendChild(glow);
     // frosted ghost sheets — staggered (left rides high, right sits low),
-    // cropped by the panel edges, with faint skeleton rows so they read as
-    // matte invoice documents rather than blank rectangles
-    function ghostSheet(sideCss){
-      var g = el('div','position:absolute;'+sideCss+';width:98px;height:150px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.45)':OL(0.045))+';border:1px solid '+(_L?'rgba(252,253,255,0.8)':OL(0.07))+';backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);padding:16px 14px;box-sizing:border-box');
+    // each dissolving outward via its own mask now that there is no panel
+    // edge to crop against
+    function ghostSheet(sideCss, fadeDir){
+      var m = 'linear-gradient('+fadeDir+', transparent, #000 60%)';
+      var g = el('div','position:absolute;'+sideCss+';width:98px;height:150px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.45)':OL(0.045))+';border:1px solid '+(_L?'rgba(252,253,255,0.8)':OL(0.07))+';backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);padding:16px 14px;box-sizing:border-box;-webkit-mask-image:'+m+';mask-image:'+m);
       [58,40,66].forEach(function(w,i){
         g.appendChild(el('div','height:7px;width:'+w+'px;border-radius:4px;background:'+(_L?'rgba(100,130,180,0.18)':OL(0.08))+';margin-bottom:'+(i<2?'10px':'0')));
       });
       return g;
     }
-    panel.appendChild(ghostSheet('left:-34px;top:36px'));
-    panel.appendChild(ghostSheet('right:-34px;bottom:36px'));
+    panel.appendChild(ghostSheet('left:-34px;top:36px','90deg'));
+    panel.appendChild(ghostSheet('right:-34px;bottom:36px','270deg'));
     // concentric halo rings radiating from the engine tile
     var rings = el('div','position:absolute;left:50%;top:calc(50% - 11px);width:0;height:0;pointer-events:none');
     [150,230,310].forEach(function(d,i){

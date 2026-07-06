@@ -423,7 +423,11 @@ ONBOARDING = """<script>
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
-    img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px;border:1px solid '+BORDER+';box-shadow:0 16px 44px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)');
+    // the PNG already has its own rounded corners baked in (transparent
+    // outside the card shape) — clipping it again with a CSS border-radius
+    // exposes a mismatched second curve at the corners, so we only add a
+    // shape-following drop-shadow here instead of a box-shadow + radius.
+    img.style.cssText = 'display:block;width:100%;height:auto;filter:drop-shadow(0 16px 30px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)')+')';
     art.appendChild(img);
     // header + sub-header sit below the illustration, on a wider text column
     var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 30px;text-align:center');

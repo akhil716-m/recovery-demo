@@ -392,8 +392,10 @@ ONBOARDING = """<script>
       document.head.appendChild(st);
     }
     shell.style.padding = '0';
-    // plain flat backdrop — no gradient, glows, or texture
-    shell.style.background = BG;
+    // soft gradient backdrop — no glow blobs, dot texture, or lines
+    shell.style.background = _L
+      ? 'radial-gradient(1100px 560px at 18% -12%, rgba(0,109,249,0.10), transparent 60%), radial-gradient(950px 520px at 84% 112%, rgba(51,153,255,0.12), transparent 60%), linear-gradient(180deg,#fbfcfe 0%,#eef3fb 100%)'
+      : 'radial-gradient(1100px 560px at 18% -12%, rgba(0,109,249,0.20), transparent 60%), radial-gradient(950px 520px at 84% 112%, rgba(37,99,235,0.14), transparent 60%), linear-gradient(180deg,#08090a 0%,#0b1120 100%)';
     var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.

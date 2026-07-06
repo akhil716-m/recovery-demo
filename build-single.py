@@ -402,21 +402,46 @@ ONBOARDING = """<script>
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
     var logo = el('div','position:absolute;top:26px;right:32px;z-index:2;display:flex;align-items:center;color:'+TEXT+';animation:rrFadeUp .6s ease both');
     logo.innerHTML = '__RR_LOGO_SVG__';
-    // hero illustration — static and framed; the story details live in the
-    // three-act journey along the bottom
-    var art = el('div','position:relative;width:100%;max-width:380px;margin:0 auto 26px;animation:rrFadeUp .6s ease .08s both;filter:drop-shadow(0 16px 30px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)')+')');
-    // the PNG already has its own rounded corners baked in (transparent
-    // outside the card shape, measured at ~6.5%/9% of width/height). A frame
-    // div clipped to that same curvature — instead of a guessed px radius on
-    // the <img> — lets the border sit exactly on the real card edge rather
-    // than mismatching it.
-    var frame = el('div','overflow:hidden;border-radius:6.5%/9%;border:1px solid '+(_L?'rgba(15,23,42,0.06)':'rgba(255,255,255,0.09)')+';line-height:0');
-    var img = document.createElement('img');
-    img.src = '__RR_HERO_SRC__';
-    img.alt = 'Failed payments recovered through the recovery engine';
-    img.style.cssText = 'display:block;width:100%;height:auto';
-    frame.appendChild(img);
-    art.appendChild(frame);
+    // hero illustration — custom composition instead of a baked PNG: the same
+    // invoice enters failed on the left, passes through the Juspay retry
+    // engine, and exits recovered on the right.
+    var art = el('div','position:relative;width:100%;max-width:640px;margin:0 auto 34px;animation:rrFadeUp .6s ease .08s both');
+    var panel = el('div','position:relative;border-radius:22px;padding:46px 34px;box-sizing:border-box;background:'+(_L?'linear-gradient(180deg,#e4eefe,#d8e7fd)':'linear-gradient(180deg,#0d1522,#101b2e)')+';border:1px solid '+(_L?'rgba(15,23,42,0.04)':OL(0.06))+';overflow:hidden');
+    // ghost side sheets cropped by the panel edges, for depth
+    panel.appendChild(el('div','position:absolute;left:-36px;top:40px;width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
+    panel.appendChild(el('div','position:absolute;right:-36px;top:28px;width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
+    // connecting arrows (drawn behind the cards)
+    var AR = _L ? 'rgba(0,109,249,0.45)' : 'rgba(96,165,250,0.55)';
+    var arrows = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none');
+    arrows.innerHTML =
+      '<svg width="100%" height="100%" viewBox="0 0 640 224" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">'
+      +'<defs><marker id="rr-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="'+AR+'"/></marker></defs>'
+      +'<path d="M218 138 C 246 138, 240 104, 264 104" fill="none" stroke="'+AR+'" stroke-width="2" marker-end="url(#rr-arr)"/>'
+      +'<path d="M376 104 C 402 104, 396 84, 420 84" fill="none" stroke="'+AR+'" stroke-width="2" marker-end="url(#rr-arr)"/>'
+      +'</svg>';
+    panel.appendChild(arrows);
+    // invoice cards — same invoice, before and after the engine
+    var hcCss = 'width:182px;box-sizing:border-box;background:'+(_L?'#ffffff':'#131a26')+';border:1px solid '+(_L?'rgba(15,23,42,0.06)':OL(0.08))+';border-radius:13px;padding:13px 14px;box-shadow:0 12px 28px '+(_L?'rgba(37,99,235,0.14)':'rgba(0,0,0,0.4)')+';text-align:left;position:relative;';
+    var lc = el('div', hcCss+'transform:translateY(20px)');
+    lc.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><span style="font-size:10.5px;font-weight:600;color:'+GRAY+'">INV-2041 · Stripe</span><span style="font-size:9.5px;font-weight:700;color:#ef4444;background:rgba(239,68,68,0.10);border-radius:999px;padding:2px 8px">Failed</span></div>'
+      +'<div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
+      +'<div style="font-size:9.8px;color:'+GRAY2+';margin-top:3px">Insufficient funds · Visa ··4242</div>';
+    var eng = el('div','display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;position:relative');
+    var tile = el('div','display:flex;align-items:center;justify-content:center;width:104px;height:104px;border-radius:26px;background:'+(_L?'#ffffff':'#0f1826')+';border:1px solid '+(_L?'rgba(15,23,42,0.05)':OL(0.08))+';box-shadow:0 18px 40px '+(_L?'rgba(37,99,235,0.18)':'rgba(0,0,0,0.5)')+', 0 0 0 10px '+(_L?'rgba(252,253,255,0.4)':OL(0.03)));
+    tile.innerHTML = '__RR_MARK_SVG__';
+    var engLbl = el('div','font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:'+(_L?'#7186a3':GRAY2));
+    engLbl.textContent = 'Smart retry engine';
+    eng.appendChild(tile); eng.appendChild(engLbl);
+    var rc = el('div', hcCss+'transform:translateY(-18px)');
+    rc.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px"><span style="font-size:10.5px;font-weight:600;color:'+GRAY+';white-space:nowrap">INV-2041 · Stripe</span><span style="font-size:9.5px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.12);border-radius:999px;padding:2px 7px;white-space:nowrap;flex-shrink:0">Recovered</span></div>'
+      +'<div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
+      +'<div style="font-size:9.8px;color:'+GRAY2+';margin-top:3px">Paid · retry #2 · Visa ··4242</div>';
+    var heroRow = el('div','position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px');
+    heroRow.appendChild(lc); heroRow.appendChild(eng); heroRow.appendChild(rc);
+    panel.appendChild(heroRow);
+    art.appendChild(panel);
     // header + sub-header sit below the illustration, on a wider text column
     var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 30px;text-align:center');
     h1.innerHTML = 'Recover failed payments with <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">intelligent retries</span>';
@@ -873,14 +898,6 @@ _onb_body = re.sub(r'rgba\(255,255,255,([0-9.]+)\)', r"'+OL(\1)+'", _onb_body)
 _onb_body = _onb_body.replace('#13181f', "'+PANEL+'")
 ONBOARDING = _onb_head + _onb_marker + _onb_body
 
-# Embed the landing hero illustration as a base64 data URI so the single-file
-# build stays self-contained (no external asset request on the deployed site).
-import base64
-_hero_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'revenue-recovery-hero.png')
-with open(_hero_path, 'rb') as _hf:
-    _hero_uri = 'data:image/png;base64,' + base64.b64encode(_hf.read()).decode('ascii')
-ONBOARDING = ONBOARDING.replace('__RR_HERO_SRC__', _hero_uri)
-
 # Inline the Juspay wordmark, made theme-aware: the "Juspay" text ships as
 # fill="white" (built for a dark bg) so it would vanish on our light default —
 # map it to currentColor (driven by the logo container's colour), and drop the
@@ -894,6 +911,12 @@ _logo_svg = re.sub(r'\s+', ' ', _logo_svg).strip()
 # give it a consistent render height regardless of the file's intrinsic px size
 _logo_svg = _logo_svg.replace('<svg width="228" height="25"', '<svg width="228" height="25" style="height:20px;width:auto;display:block"', 1)
 ONBOARDING = ONBOARDING.replace('__RR_LOGO_SVG__', _logo_svg)
+
+# Extract just the circular Juspay mark (the two blue paths) from the wordmark
+# for the hero illustration's engine tile.
+_mark_paths = re.findall(r'<path[^>]+fill="#(?:2B8EFF|0561E2)"[^>]*/>', _logo_svg)
+_mark_svg = '<svg width="44" height="44" viewBox="0 0 22.8 22.8" fill="none" xmlns="http://www.w3.org/2000/svg">' + ''.join(_mark_paths) + '</svg>'
+ONBOARDING = ONBOARDING.replace('__RR_MARK_SVG__', _mark_svg)
 
 html = html.replace('</body>', ONBOARDING + '</body>', 1)
 

@@ -357,6 +357,31 @@ ONBOARDING = """<script>
     setTimeout(window.rrFixGradients, 500);
     setTimeout(window.rrFixGradients, 1000);
     window.addEventListener('load', window.rrFixGradients);
+
+    // Reflect the processor actually chosen (or defaulted) during onboarding
+    // in the Overview's "Merchant gateway" card, instead of a hardcoded
+    // "Stripe · acme.inc" that ignores what the user just set up.
+    window.rrFixProcessorLabel = function(){
+      var pay = (function(){ try{ return localStorage.getItem('rrPayProcessor')||'Stripe'; }catch(e){ return 'Stripe'; } })();
+      document.querySelectorAll('main p, main span, main div').forEach(function(e){
+        if(e.children.length) return;
+        var t = e.textContent;
+        if(!t || t.indexOf('· acme.inc') === -1) return;
+        var want = pay+' · acme.inc';
+        if(t !== want) e.textContent = want;
+      });
+    };
+    function watchProcessorLabel(){
+      var main = document.querySelector('main');
+      if(!main){ setTimeout(watchProcessorLabel, 100); return; }
+      var t; new MutationObserver(function(){ clearTimeout(t); t = setTimeout(window.rrFixProcessorLabel, 60); })
+        .observe(main, {childList:true, subtree:true});
+      window.rrFixProcessorLabel();
+    }
+    watchProcessorLabel();
+    setTimeout(window.rrFixProcessorLabel, 50);
+    setTimeout(window.rrFixProcessorLabel, 300);
+    setTimeout(window.rrFixProcessorLabel, 800);
     return;
   }
 
@@ -596,6 +621,8 @@ ONBOARDING = """<script>
     var confirmBtn = btn('Continue to demo →','padding:8px 16px;border-radius:8px;border:1px solid '+BRAND+';background:'+BRAND+';color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
       function(){
         localStorage.setItem('rrSetupV2','1');
+        // matches the defaults shown in the list above
+        try{ localStorage.setItem('rrPayProcessor','Stripe'); localStorage.setItem('rrBillProcessor','Chargebee'); }catch(e){}
         try{ sessionStorage.setItem('rrInApp','1'); }catch(e){}
         try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
         location.reload();
@@ -929,6 +956,14 @@ ONBOARDING = """<script>
       });
       container.appendChild(primaryBtn('Start exploring', false, function(){
         localStorage.setItem('rrSetupV2','1');
+        // carry the processors actually chosen in this wizard through to the
+        // Overview's "Merchant gateway" card, instead of leaving it hardcoded
+        try{
+          var payName = (PAY_PROCS.find(function(p){ return p.id===state.payProc; })||{}).name || 'Stripe';
+          var billName2 = (BILL_PROCS.find(function(p){ return p.id===state.billProc; })||{}).name || 'Chargebee';
+          localStorage.setItem('rrPayProcessor', payName);
+          localStorage.setItem('rrBillProcessor', billName2);
+        }catch(e){}
         try{ sessionStorage.setItem('rrInApp','1'); }catch(e){}
         try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
         location.reload();

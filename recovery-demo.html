@@ -502,9 +502,18 @@
         ? 'radial-gradient(300px 200px at 16% 66%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(300px 200px at 86% 34%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(380px 260px at 50% 42%, rgba(0,109,249,0.13), transparent 72%), linear-gradient(180deg,#e7f0fe,#d5e5fc)'
         : 'radial-gradient(300px 200px at 16% 66%, rgba(239,68,68,0.10), transparent 70%), radial-gradient(300px 200px at 86% 34%, rgba(34,197,94,0.10), transparent 70%), radial-gradient(380px 260px at 50% 42%, rgba(0,109,249,0.22), transparent 72%), linear-gradient(180deg,#0d1522,#101b2e)')
       +';border:1px solid '+(_L?'rgba(15,23,42,0.04)':OL(0.06))+';overflow:hidden');
-    // ghost side sheets cropped by the panel edges, for depth
-    panel.appendChild(el('div','position:absolute;left:-36px;top:50%;transform:translateY(-52%);width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
-    panel.appendChild(el('div','position:absolute;right:-36px;top:50%;transform:translateY(-46%);width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
+    // frosted ghost sheets — staggered (left rides high, right sits low),
+    // cropped by the panel edges, with faint skeleton rows so they read as
+    // matte invoice documents rather than blank rectangles
+    function ghostSheet(sideCss){
+      var g = el('div','position:absolute;'+sideCss+';width:98px;height:150px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.45)':OL(0.045))+';border:1px solid '+(_L?'rgba(252,253,255,0.8)':OL(0.07))+';backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);padding:16px 14px;box-sizing:border-box');
+      [58,40,66].forEach(function(w,i){
+        g.appendChild(el('div','height:7px;width:'+w+'px;border-radius:4px;background:'+(_L?'rgba(100,130,180,0.18)':OL(0.08))+';margin-bottom:'+(i<2?'10px':'0')));
+      });
+      return g;
+    }
+    panel.appendChild(ghostSheet('left:-34px;top:36px'));
+    panel.appendChild(ghostSheet('right:-34px;bottom:36px'));
     // concentric halo rings radiating from the engine tile
     var rings = el('div','position:absolute;left:50%;top:calc(50% - 11px);width:0;height:0;pointer-events:none');
     [150,230,310].forEach(function(d,i){

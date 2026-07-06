@@ -461,11 +461,11 @@ ONBOARDING = """<script>
     // bleed layer that extends past the composition and fades out on all
     // four edges, blending seamlessly into the page background.
     var panel = el('div','position:relative;padding:120px 34px;box-sizing:border-box');
-    var glow = el('div','position:absolute;top:-70px;bottom:-70px;left:-200px;right:-200px;pointer-events:none;background:'
+    var glow = el('div','position:absolute;top:-130px;bottom:-130px;left:-340px;right:-340px;pointer-events:none;background:'
       +(_L
-        ? 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(460px 320px at 50% 46%, rgba(0,109,249,0.13), transparent 72%), radial-gradient(closest-side, #dde9fc 30%, rgba(221,233,252,0) 100%)'
-        : 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.09), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.09), transparent 70%), radial-gradient(460px 320px at 50% 46%, rgba(0,109,249,0.20), transparent 72%), radial-gradient(closest-side, #0e1a2e 30%, rgba(14,26,46,0) 100%)')
-      +';-webkit-mask-image:radial-gradient(ellipse 72% 68% at 50% 50%, #000 38%, transparent 76%);mask-image:radial-gradient(ellipse 72% 68% at 50% 50%, #000 38%, transparent 76%)');
+        ? 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(540px 380px at 50% 46%, rgba(0,109,249,0.13), transparent 74%), radial-gradient(closest-side, #dde9fc 30%, rgba(221,233,252,0) 100%)'
+        : 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.09), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.09), transparent 70%), radial-gradient(540px 380px at 50% 46%, rgba(0,109,249,0.20), transparent 74%), radial-gradient(closest-side, #0e1a2e 30%, rgba(14,26,46,0) 100%)')
+      +';-webkit-mask-image:radial-gradient(ellipse 80% 74% at 50% 50%, #000 42%, transparent 84%);mask-image:radial-gradient(ellipse 80% 74% at 50% 50%, #000 42%, transparent 84%)');
     panel.appendChild(glow);
     // frosted ghost sheets — staggered (left rides high, right sits low),
     // each dissolving outward via its own mask now that there is no panel

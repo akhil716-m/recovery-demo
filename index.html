@@ -462,6 +462,45 @@
     setTimeout(window.rrFixProcessorLabel, 50);
     setTimeout(window.rrFixProcessorLabel, 300);
     setTimeout(window.rrFixProcessorLabel, 800);
+
+    // The Overview's pipeline used to sit paused behind a "Start recovery
+    // simulation" button. Once someone has been through onboarding (or the
+    // default-setup shortcut), their processor is already "connected" --
+    // there's nothing left to opt into, so the live feed should just be
+    // running when they land here. Auto-fire that button once per Overview
+    // mount and hide it; Recovery Simulation and Live Flow remain the two
+    // tabs for manually driving a scenario.
+    window.rrAutoStartSim = function(){
+      var btns = document.querySelectorAll('main button');
+      for(var i=0;i<btns.length;i++){
+        var b = btns[i];
+        var t = b.textContent.trim();
+        // Overview keeps running in the background across tab switches, but
+        // React remounts a *fresh* button node each time you come back to
+        // it -- so "already running" (Pause) needs hiding just as much as
+        // the not-yet-started state does, on every single mount.
+        if(t.indexOf('Start recovery simulation') === 0){
+          b.click();
+          b.style.display = 'none';
+          return;
+        }
+        if(t.indexOf('Pause') === 0 && b.style.display !== 'none'){
+          b.style.display = 'none';
+          return;
+        }
+      }
+    };
+    function watchAutoStartSim(){
+      var main = document.querySelector('main');
+      if(!main){ setTimeout(watchAutoStartSim, 100); return; }
+      var t; new MutationObserver(function(){ clearTimeout(t); t = setTimeout(window.rrAutoStartSim, 60); })
+        .observe(main, {childList:true, subtree:true});
+      window.rrAutoStartSim();
+    }
+    watchAutoStartSim();
+    setTimeout(window.rrAutoStartSim, 50);
+    setTimeout(window.rrAutoStartSim, 300);
+    setTimeout(window.rrAutoStartSim, 800);
     return;
   }
 

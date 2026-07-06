@@ -438,33 +438,20 @@ ONBOARDING = """<script>
         +'<div style="font-size:10px;color:'+GRAY2+';margin-top:2px">'+v[1]+'</div>';
       shell.appendChild(c);
     });
-    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 24px 108px;box-sizing:border-box');
+    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px 24px 108px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
     var logo = el('div','position:absolute;top:26px;right:32px;z-index:2;display:flex;align-items:center;color:'+TEXT+';animation:rrFadeUp .6s ease both');
     logo.innerHTML = '__RR_LOGO_SVG__';
-    // hero illustration — static, framed, flanked by two data cards that
-    // mirror real dashboard content (composition, not decoration)
+    // hero illustration — static and framed; the story details live in the
+    // three-act journey along the bottom
     var art = el('div','position:relative;width:100%;max-width:380px;margin:0 auto 26px;animation:rrFadeUp .6s ease .08s both');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
     img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px;border:1px solid '+BORDER+';box-shadow:0 16px 44px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)');
     art.appendChild(img);
-    var cardBase = 'position:absolute;background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:14px;box-shadow:0 12px 32px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)')+';padding:14px 16px;text-align:left;pointer-events:none;';
-    var card1 = el('div', cardBase+'left:-162px;bottom:-22px;width:186px;box-sizing:border-box');
-    card1.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><span style="font-size:11px;font-weight:600;color:'+GRAY+'">INV-2041 · Stripe</span><span style="font-size:10px;font-weight:700;color:#ef4444;background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.22);border-radius:999px;padding:2px 8px">Failed</span></div>'
-      +'<div style="font-size:17px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
-      +'<div style="font-size:10.5px;color:'+GRAY2+';margin:3px 0 10px">Insufficient funds · Visa ··4242</div>'
-      +'<span style="display:inline-block;font-size:10px;font-weight:600;color:'+BRAND+';background:rgba(0,109,249,0.10);border-radius:999px;padding:3px 9px">Retry #2 · in 3h</span>';
-    var card2 = el('div', cardBase+'right:-150px;top:-26px;width:180px;box-sizing:border-box');
-    card2.innerHTML =
-      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e"></span><span style="font-size:11px;font-weight:600;color:'+GRAY+'">Recovery rate</span></div>'
-      +'<div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:20px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">87.4%</span><span style="font-size:10px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.10);border-radius:999px;padding:2px 7px">+12%</span></div>'
-      +'<svg width="148" height="34" viewBox="0 0 148 34" style="display:block;margin-top:8px"><polyline points="2,28 28,22 52,25 76,12 102,17 146,4" fill="none" stroke="#22c55e" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/></svg>';
-    art.appendChild(card1); art.appendChild(card2);
     // header + sub-header sit below the illustration, on a wider text column
     var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 14px;text-align:center');
     h1.innerHTML = 'Recover failed payments with <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">intelligent retries</span>';

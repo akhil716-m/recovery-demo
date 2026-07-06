@@ -91,31 +91,6 @@ _flat_rows = ('<style id="rr-flat-pipeline">'
   '</style>')
 html = html.replace('</head>', _flat_rows + '</head>', 1)
 
-# Dashboard action buttons (.btn-primary / .btn-secondary, e.g. "Start
-# recovery simulation", Live Flow's Start/Reset) get a "juicy" treatment —
-# a soft top sheen plus a darker inset bottom edge for a slight 3D press
-# feel, matching the Juspay Blend button reference. Kept to dashboard-native
-# buttons only; the landing/wizard buttons are untouched.
-_juicy_btns = ('<style id="rr-juicy-buttons">'
-  '.btn-primary,.btn-secondary{border-radius:10px!important;font-weight:700!important;background-repeat:no-repeat!important}'
-  '.btn-primary{border:1px solid rgba(0,0,0,0.25)!important;'
-    'background-image:linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0) 55%),linear-gradient(180deg,var(--accent),var(--accent))!important;'
-    'box-shadow:inset 0 -3px 0 rgba(0,0,0,0.28),0 2px 6px rgba(0,109,249,0.25)!important}'
-  '.btn-primary:hover{'
-    'background-image:linear-gradient(180deg,rgba(255,255,255,0.26),rgba(255,255,255,0) 55%),linear-gradient(180deg,var(--accent-hover),var(--accent-hover))!important}'
-  '.btn-primary:active{box-shadow:inset 0 -1px 0 rgba(0,0,0,0.28),0 1px 2px rgba(0,109,249,0.2)!important;transform:translateY(1px)}'
-  '.btn-secondary{border:1px solid var(--border-strong)!important;'
-    'background-image:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0) 55%),linear-gradient(180deg,var(--surface-2),var(--surface-2))!important;'
-    'box-shadow:inset 0 -3px 0 rgba(0,0,0,0.35)!important}'
-  '.btn-secondary:active{box-shadow:inset 0 -1px 0 rgba(0,0,0,0.35)!important;transform:translateY(1px)}'
-  'html.rr-light .btn-primary{border-color:rgba(0,60,160,0.30)!important;'
-    'box-shadow:inset 0 -3px 0 rgba(0,40,120,0.28),0 2px 6px rgba(0,109,249,0.22)!important}'
-  'html.rr-light .btn-secondary{color:var(--text)!important;'
-    'background-image:linear-gradient(180deg,#ffffff,rgba(255,255,255,0) 55%),linear-gradient(180deg,var(--surface-2),var(--surface-2))!important;'
-    'box-shadow:inset 0 -2px 0 rgba(15,23,42,0.10)!important}'
-  '</style>')
-html = html.replace('</head>', _juicy_btns + '</head>', 1)
-
 ONBOARDING = """<script>
 (function(){
   // Landing + onboarding are always dark, independent of whatever the user
@@ -1183,8 +1158,7 @@ SIMULATION_VIEW = r"""<script>
     };
     els.resetBtn = resetBtn;
 
-    var startBtn = el('button','flex-shrink:0');
-    startBtn.className = 'btn-primary text-[13px] font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed';
+    var startBtn = el('button','padding:10px 22px;border-radius:9px;border:none;background:'+BRAND+';color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,102,255,.3)');
     startBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Start</span>';
     startBtn.onclick = function(){ if(state.phase!=='running') runSim(); };
     els.startBtn = startBtn;
@@ -1534,10 +1508,7 @@ SIMULATION_VIEW = r"""<script>
   function updateStartBtn(){
     if(!els.startBtn) return;
     var running=state.phase==='running', done=state.phase==='done';
-    // startBtn now inherits its fill from the shared .btn-primary treatment
-    // (gradient + inset shadow) instead of an inline background, so the
-    // "running" state dims via opacity rather than swapping the colour.
-    els.startBtn.style.opacity = running ? '0.6' : '1';
+    els.startBtn.style.background = running ? 'rgba(0,109,249,0.5)' : BRAND;
     els.startBtn.style.cursor = running ? 'default' : 'pointer';
     var icon = done ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.9"/></svg>'
                     : running ? '' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';

@@ -443,11 +443,11 @@ ONBOARDING = """<script>
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
-    var logo = el('div','display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:'+TEXT+';animation:rrFadeUp .6s ease both');
+    var logo = el('div','position:absolute;top:26px;right:32px;z-index:2;display:flex;align-items:center;color:'+TEXT+';animation:rrFadeUp .6s ease both');
     logo.innerHTML = '__RR_LOGO_SVG__';
     // hero illustration — static, framed, flanked by two data cards that
     // mirror real dashboard content (composition, not decoration)
-    var art = el('div','position:relative;width:100%;max-width:340px;margin:0 auto 22px;animation:rrFadeUp .6s ease .08s both');
+    var art = el('div','position:relative;width:100%;max-width:380px;margin:0 auto 26px;animation:rrFadeUp .6s ease .08s both');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
@@ -479,17 +479,10 @@ ONBOARDING = """<script>
     eyebrow.textContent = 'Revenue Recovery';
     var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
     inner.appendChild(eyebrow); inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
-    // trust metrics row
-    var stats = el('div','display:flex;align-items:center;justify-content:center;margin-top:20px');
-    [['87.4%','recovery rate'],['$2.1M','recovered this quarter'],['−38%','involuntary churn']].forEach(function(s,i){
-      var it = el('div','padding:0 26px;text-align:center'+(i?';border-left:1px solid '+BORDER:''));
-      it.innerHTML = '<div style="font-size:18px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">'+s[0]+'</div><div style="font-size:11.5px;color:'+GRAY2+';margin-top:2px">'+s[1]+'</div>';
-      stats.appendChild(it);
-    });
-    inner.appendChild(stats);
-    content.appendChild(logo); content.appendChild(art); content.appendChild(inner);
+    content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
     shell.appendChild(wrap);
+    shell.appendChild(logo);
   }
 
   /* ── wizard ── */

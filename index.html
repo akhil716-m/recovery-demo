@@ -479,8 +479,7 @@
       var st = document.createElement('style'); st.id = 'rr-landing-anim';
       st.textContent = '@keyframes rrDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(46px,-32px) scale(1.08)}}'
         +'@keyframes rrDrift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-52px,26px) scale(1.06)}}'
-        +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}'
-        +'@keyframes rrDash{to{stroke-dashoffset:-420}}';
+        +'@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}';
       document.head.appendChild(st);
     }
     shell.style.padding = '0';
@@ -492,17 +491,13 @@
     var blob1 = el('div','position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(85px);background:'+(_L?'rgba(0,109,249,0.10)':'rgba(0,109,249,0.15)')+';top:-160px;left:-120px;animation:rrDrift 18s ease-in-out infinite;pointer-events:none');
     var blob2 = el('div','position:absolute;width:460px;height:460px;border-radius:50%;filter:blur(95px);background:'+(_L?'rgba(51,153,255,0.12)':'rgba(37,99,235,0.13)')+';bottom:-140px;right:-100px;animation:rrDrift2 22s ease-in-out infinite;pointer-events:none');
     shell.appendChild(blob1); shell.appendChild(blob2);
-    // product-flavoured backdrop: dashboard grid, ghost invoice cards, and
-    // dashed retry paths with payments travelling toward recovery
-    var flow1 = 'M -80 828 C 300 800, 620 856, 900 824 C 1180 792, 1400 844, 1720 812';
-    var flow2 = 'M 1700 140 C 1350 190, 1050 110, 780 160 C 500 210, 260 150, -60 190';
-    var bgsvg = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden');
+    // soft dot-grid texture, fading out toward the edges so the centre of the
+    // page stays clean for the hero
+    var bgsvg = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;-webkit-mask-image:radial-gradient(ellipse 90% 85% at 50% 45%,transparent 28%,#000 78%);mask-image:radial-gradient(ellipse 90% 85% at 50% 45%,transparent 28%,#000 78%)');
     bgsvg.innerHTML =
       '<svg width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'
-      +'<defs><pattern id="rr-grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="'+OL(_L?0.045:0.055)+'" stroke-width="1"/></pattern></defs>'
-      +'<rect width="1600" height="900" fill="url(#rr-grid)"/>'
-      +'<path d="'+flow1+'" fill="none" stroke="rgba(0,109,249,'+(_L?0.22:0.28)+')" stroke-width="1.5" stroke-dasharray="5 9" style="animation:rrDash 30s linear infinite"/>'
-      +'<path d="'+flow2+'" fill="none" stroke="'+OL(0.10)+'" stroke-width="1.5" stroke-dasharray="4 10" style="animation:rrDash 40s linear infinite"/>'
+      +'<defs><pattern id="rr-dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.5" fill="'+OL(_L?0.10:0.12)+'"/></pattern></defs>'
+      +'<rect width="1600" height="900" fill="url(#rr-dots)"/>'
       +'</svg>';
     shell.appendChild(bgsvg);
     var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px;box-sizing:border-box');

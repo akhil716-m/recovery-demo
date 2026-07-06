@@ -93,8 +93,11 @@ html = html.replace('</head>', _flat_rows + '</head>', 1)
 
 ONBOARDING = """<script>
 (function(){
-  // Landing + onboarding respect the persisted theme (no toggle here yet).
-  var _L = (function(){ try{ return localStorage.getItem('rrTheme')!=='dark'; }catch(e){ return true; } })();
+  // Landing + onboarding are always dark, independent of whatever the user
+  // picks once inside the dashboard. The dashboard's own preference lives in
+  // a separate key (rrDashTheme) and never reaches back out to these surfaces
+  // -- every exit/entry into the app is dark by default, no exceptions.
+  var _L = false;
   function OL(a){ return (_L?'rgba(15,23,42,':'rgba(255,255,255,')+a+')'; }
   var BRAND='#006DF9',
       BG    = _L?'#f6f7f9':'#08090a',
@@ -107,17 +110,20 @@ ONBOARDING = """<script>
 
   var SUN_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
   var MOON_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>';
+  // The dashboard's theme preference is tracked separately (rrDashTheme) and
+  // defaults to dark; the toggle inside the dashboard only ever writes here.
   window.rrApplyTheme = function(light){
-    try{ localStorage.setItem('rrTheme', light?'light':'dark'); }catch(e){}
+    try{ localStorage.setItem('rrDashTheme', light?'light':'dark'); }catch(e){}
     document.documentElement.classList.toggle('rr-light', !!light);
     if(window.rrFixGradients){ window.rrFixGradients(); setTimeout(window.rrFixGradients, 60); }
     if(window.rrOnThemeChange) window.rrOnThemeChange(!!light);
   };
 
   // React's hydration resets <html>'s className, wiping the rr-light class the
-  // boot script added. Re-enforce the persisted theme and keep it enforced.
+  // boot script added. Re-enforce the persisted dashboard theme and keep it
+  // enforced. Defaults to dark unless the user explicitly chose light.
   function rrEnsureTheme(){
-    var want; try{ want = localStorage.getItem('rrTheme')!=='dark'; }catch(e){ want=true; }
+    var want; try{ want = localStorage.getItem('rrDashTheme')==='light'; }catch(e){ want=false; }
     var has = document.documentElement.classList.contains('rr-light');
     if(want && !has) document.documentElement.classList.add('rr-light');
     else if(!want && has) document.documentElement.classList.remove('rr-light');
@@ -2349,8 +2355,10 @@ for _m in sorted(set(re.findall(r'(?:bg|border|text|ring)-white/\[0?\.[0-9]+\]',
 _theme_rules.append('html.rr-light body{background:#ffffff;color-scheme:light}')
 
 _THEME_CSS = '<style id="rr-theme-light">' + ''.join(_theme_rules) + '</style>'
-# Apply the persisted theme before first paint to avoid a flash.
-_THEME_BOOT = '<script>try{if(localStorage.getItem("rrTheme")!=="dark")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
+# Apply the persisted dashboard theme before first paint to avoid a flash.
+# Defaults to dark; only the in-dashboard toggle (writing rrDashTheme) can
+# opt into light, and that choice never reaches the landing/onboarding overlay.
+_THEME_BOOT = '<script>try{if(localStorage.getItem("rrDashTheme")==="light")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
 html = html.replace('</head>', _THEME_CSS + _THEME_BOOT + '</head>', 1)
 
 # Write the built page to BOTH names:

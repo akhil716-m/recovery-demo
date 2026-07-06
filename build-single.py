@@ -72,10 +72,32 @@ html = re.sub(r'<script>document\.documentElement\.classList\.add\("rr-booting"\
 # a uniform gap, so override the 3rd+ children specifically).
 html = html.replace('</head>', '<style>main.space-y-6>div:nth-child(2){margin-top:32px!important}main.space-y-6>div:nth-child(n+3){margin-top:40px!important}</style></head>', 1)
 
+# "Failures received" wraps to two lines ("FAILURES"/"RECEIVED") in its narrow
+# stat column next to the single-word "Soft"/"Hard" labels — shorten to match.
+html = html.replace('Failures received', 'Received')
+
+# Flatten the Live Recovery Pipeline invoice rows. Each row ships as its own
+# bordered, filled card (`mx-2 my-1 rounded-md border bg-[#0f1012]`) nested
+# inside the column inside the panel — box-in-box-in-box. Render them as a
+# flat list divided by hairlines instead; the coloured accent bar and hover
+# state carry the row structure.
+_flat_rows = ('<style id="rr-flat-pipeline">'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]{background:transparent!important;border:0!important;border-radius:8px;margin:0 8px!important}'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:not(:last-child){border-bottom:1px solid rgba(255,255,255,0.055)!important;border-radius:0}'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:hover{background:rgba(255,255,255,0.035)!important}'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]>div{padding-top:11px!important;padding-bottom:11px!important}'
+  'html.rr-light div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:not(:last-child){border-bottom:1px solid rgba(15,23,42,0.08)!important}'
+  'html.rr-light div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:hover{background:rgba(15,23,42,0.04)!important}'
+  '</style>')
+html = html.replace('</head>', _flat_rows + '</head>', 1)
+
 ONBOARDING = """<script>
 (function(){
-  // Landing + onboarding respect the persisted theme (no toggle here yet).
-  var _L = (function(){ try{ return localStorage.getItem('rrTheme')==='light'; }catch(e){ return false; } })();
+  // Landing + onboarding are always dark, independent of whatever the user
+  // picks once inside the dashboard. The dashboard's own preference lives in
+  // a separate key (rrDashTheme) and never reaches back out to these surfaces
+  // -- every exit/entry into the app is dark by default, no exceptions.
+  var _L = false;
   function OL(a){ return (_L?'rgba(15,23,42,':'rgba(255,255,255,')+a+')'; }
   var BRAND='#006DF9',
       BG    = _L?'#f6f7f9':'#08090a',
@@ -88,17 +110,20 @@ ONBOARDING = """<script>
 
   var SUN_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
   var MOON_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>';
+  // The dashboard's theme preference is tracked separately (rrDashTheme) and
+  // defaults to dark; the toggle inside the dashboard only ever writes here.
   window.rrApplyTheme = function(light){
-    try{ localStorage.setItem('rrTheme', light?'light':'dark'); }catch(e){}
+    try{ localStorage.setItem('rrDashTheme', light?'light':'dark'); }catch(e){}
     document.documentElement.classList.toggle('rr-light', !!light);
     if(window.rrFixGradients){ window.rrFixGradients(); setTimeout(window.rrFixGradients, 60); }
     if(window.rrOnThemeChange) window.rrOnThemeChange(!!light);
   };
 
   // React's hydration resets <html>'s className, wiping the rr-light class the
-  // boot script added. Re-enforce the persisted theme and keep it enforced.
+  // boot script added. Re-enforce the persisted dashboard theme and keep it
+  // enforced. Defaults to dark unless the user explicitly chose light.
   function rrEnsureTheme(){
-    var want; try{ want = localStorage.getItem('rrTheme')==='light'; }catch(e){ want=false; }
+    var want; try{ want = localStorage.getItem('rrDashTheme')==='light'; }catch(e){ want=false; }
     var has = document.documentElement.classList.contains('rr-light');
     if(want && !has) document.documentElement.classList.add('rr-light');
     else if(!want && has) document.documentElement.classList.remove('rr-light');
@@ -132,7 +157,7 @@ ONBOARDING = """<script>
     exit.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
     exit.onmouseenter = function(){ exit.style.color=TEXT; };
     exit.onmouseleave = function(){ exit.style.color=GRAY2; };
-    exit.onclick = function(){ localStorage.removeItem('rrSetupV2'); location.reload(); };
+    exit.onclick = function(){ localStorage.removeItem('rrSetupV2'); try{ sessionStorage.removeItem('rrInApp'); }catch(e){} location.reload(); };
     profile.appendChild(exit);
   }
 
@@ -330,13 +355,82 @@ ONBOARDING = """<script>
     window.rrFixInline();
   }
 
-  if(localStorage.getItem('rrSetupV2')){
+  // Show the landing page on every fresh URL entry. We only jump straight to
+  // the dashboard when the user has entered the app within this tab session
+  // (set on skip/complete/explore below), so reopening the URL always lands
+  // on the hero first.
+  var _inApp = (function(){ try{ return sessionStorage.getItem('rrInApp')==='1'; }catch(e){ return false; } })();
+  if(localStorage.getItem('rrSetupV2') && _inApp){
     addExitBtn(); watchExitBtn(); watchGradients();
     setTimeout(window.rrFixGradients, 50);
     setTimeout(window.rrFixGradients, 200);
     setTimeout(window.rrFixGradients, 500);
     setTimeout(window.rrFixGradients, 1000);
     window.addEventListener('load', window.rrFixGradients);
+
+    // Reflect the processor actually chosen (or defaulted) during onboarding
+    // in the Overview's "Merchant gateway" card, instead of a hardcoded
+    // "Stripe · acme.inc" that ignores what the user just set up.
+    window.rrFixProcessorLabel = function(){
+      var pay = (function(){ try{ return localStorage.getItem('rrPayProcessor')||'Stripe'; }catch(e){ return 'Stripe'; } })();
+      document.querySelectorAll('main p, main span, main div').forEach(function(e){
+        if(e.children.length) return;
+        var t = e.textContent;
+        if(!t || t.indexOf('· acme.inc') === -1) return;
+        var want = pay+' · acme.inc';
+        if(t !== want) e.textContent = want;
+      });
+    };
+    function watchProcessorLabel(){
+      var main = document.querySelector('main');
+      if(!main){ setTimeout(watchProcessorLabel, 100); return; }
+      var t; new MutationObserver(function(){ clearTimeout(t); t = setTimeout(window.rrFixProcessorLabel, 60); })
+        .observe(main, {childList:true, subtree:true});
+      window.rrFixProcessorLabel();
+    }
+    watchProcessorLabel();
+    setTimeout(window.rrFixProcessorLabel, 50);
+    setTimeout(window.rrFixProcessorLabel, 300);
+    setTimeout(window.rrFixProcessorLabel, 800);
+
+    // The Overview's pipeline used to sit paused behind a "Start recovery
+    // simulation" button. Once someone has been through onboarding (or the
+    // default-setup shortcut), their processor is already "connected" --
+    // there's nothing left to opt into, so the live feed should just be
+    // running when they land here. Auto-fire that button once per Overview
+    // mount and hide it; Recovery Simulation and Live Flow remain the two
+    // tabs for manually driving a scenario.
+    window.rrAutoStartSim = function(){
+      var btns = document.querySelectorAll('main button');
+      for(var i=0;i<btns.length;i++){
+        var b = btns[i];
+        var t = b.textContent.trim();
+        // Overview keeps running in the background across tab switches, but
+        // React remounts a *fresh* button node each time you come back to
+        // it -- so "already running" (Pause) needs hiding just as much as
+        // the not-yet-started state does, on every single mount.
+        if(t.indexOf('Start recovery simulation') === 0){
+          b.click();
+          b.style.display = 'none';
+          return;
+        }
+        if(t.indexOf('Pause') === 0 && b.style.display !== 'none'){
+          b.style.display = 'none';
+          return;
+        }
+      }
+    };
+    function watchAutoStartSim(){
+      var main = document.querySelector('main');
+      if(!main){ setTimeout(watchAutoStartSim, 100); return; }
+      var t; new MutationObserver(function(){ clearTimeout(t); t = setTimeout(window.rrAutoStartSim, 60); })
+        .observe(main, {childList:true, subtree:true});
+      window.rrAutoStartSim();
+    }
+    watchAutoStartSim();
+    setTimeout(window.rrAutoStartSim, 50);
+    setTimeout(window.rrAutoStartSim, 300);
+    setTimeout(window.rrAutoStartSim, 800);
     return;
   }
 
@@ -380,26 +474,126 @@ ONBOARDING = """<script>
 
   /* ── landing ── */
   function renderLanding(){
-    var wrap = el('div','flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center');
-    var logo = el('div','display:flex;align-items:center;gap:10px;margin-bottom:48px');
-    logo.innerHTML = '<div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#006DF9,#3399FF)"></div>'
-      +'<span style="font-size:16px;font-weight:700;color:'+TEXT+'">Hyperswitch</span>'
-      +'<span style="font-size:11px;color:'+BRAND+';background:rgba(0,109,249,0.1);border:1px solid rgba(0,109,249,0.2);border-radius:6px;padding:2px 8px;font-weight:600">Revenue Recovery</span>';
-    var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 16px;text-align:center');
-    h1.innerHTML = 'Recover failed payments<br>with <span style="color:'+BRAND+'">intelligent retries</span>';
-    var p = el('p','font-size:15px;color:'+GRAY+';line-height:1.65;margin:0 0 40px;text-align:center;max-width:420px');
-    p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
-    var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit',
+    // keyframes for the landing motion (injected once)
+    if(!document.getElementById('rr-landing-anim')){
+      var st = document.createElement('style'); st.id = 'rr-landing-anim';
+      st.textContent = '@keyframes rrFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}';
+      document.head.appendChild(st);
+    }
+    shell.style.padding = '0';
+    // soft gradient backdrop — no glow blobs, dot texture, or lines
+    shell.style.background = _L
+      ? 'radial-gradient(1100px 560px at 18% -12%, rgba(0,109,249,0.10), transparent 60%), radial-gradient(950px 520px at 84% 112%, rgba(51,153,255,0.12), transparent 60%), linear-gradient(180deg,#fbfcfe 0%,#eef3fb 100%)'
+      : 'radial-gradient(1100px 560px at 18% -12%, rgba(0,109,249,0.20), transparent 60%), radial-gradient(950px 520px at 84% 112%, rgba(37,99,235,0.14), transparent 60%), linear-gradient(180deg,#08090a 0%,#0b1120 100%)';
+    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:64px 24px 24px;box-sizing:border-box');
+    // margin:auto centres the column vertically when it fits, yet lets it
+    // scroll (instead of clipping the top) on short viewports.
+    var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
+    var logo = el('div','position:absolute;top:26px;right:32px;z-index:2;display:flex;align-items:center;color:'+TEXT+';animation:rrFadeUp .6s ease both');
+    logo.innerHTML = '__RR_LOGO_SVG__';
+    // hero illustration — custom composition instead of a baked PNG: the same
+    // invoice enters failed on the left, passes through the Juspay retry
+    // engine, and exits recovered on the right.
+    var art = el('div','position:relative;width:100%;max-width:640px;margin:0 auto 58px;animation:rrFadeUp .6s ease .08s both');
+    // no container box: the story washes (red under the failed card, green
+    // under the recovered one, blue radiating from the engine) live on a
+    // bleed layer that extends past the composition and fades out on all
+    // four edges, blending seamlessly into the page background.
+    var panel = el('div','position:relative;padding:120px 34px;box-sizing:border-box');
+    var glow = el('div','position:absolute;top:-130px;bottom:-130px;left:-340px;right:-340px;pointer-events:none;background:'
+      +(_L
+        ? 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(540px 380px at 50% 46%, rgba(0,109,249,0.13), transparent 74%), radial-gradient(closest-side, #dde9fc 30%, rgba(221,233,252,0) 100%)'
+        : 'radial-gradient(340px 220px at 26% 62%, rgba(239,68,68,0.09), transparent 70%), radial-gradient(340px 220px at 74% 38%, rgba(34,197,94,0.09), transparent 70%), radial-gradient(540px 380px at 50% 46%, rgba(0,109,249,0.20), transparent 74%), radial-gradient(closest-side, #0e1a2e 30%, rgba(14,26,46,0) 100%)')
+      +';-webkit-mask-image:radial-gradient(ellipse 80% 74% at 50% 50%, #000 42%, transparent 84%);mask-image:radial-gradient(ellipse 80% 74% at 50% 50%, #000 42%, transparent 84%)');
+    panel.appendChild(glow);
+    // frosted ghost sheets — staggered (left rides high, right sits low),
+    // each dissolving outward via its own mask now that there is no panel
+    // edge to crop against
+    function ghostSheet(sideCss, fadeDir){
+      var m = 'linear-gradient('+fadeDir+', transparent, #000 60%)';
+      var g = el('div','position:absolute;'+sideCss+';width:98px;height:150px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.45)':OL(0.045))+';border:1px solid '+(_L?'rgba(252,253,255,0.8)':OL(0.07))+';backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);padding:16px 14px;box-sizing:border-box;-webkit-mask-image:'+m+';mask-image:'+m);
+      [58,40,66].forEach(function(w,i){
+        g.appendChild(el('div','height:7px;width:'+w+'px;border-radius:4px;background:'+(_L?'rgba(100,130,180,0.18)':OL(0.08))+';margin-bottom:'+(i<2?'10px':'0')));
+      });
+      return g;
+    }
+    panel.appendChild(ghostSheet('left:-34px;top:36px','90deg'));
+    panel.appendChild(ghostSheet('right:-34px;bottom:36px','270deg'));
+    // concentric halo rings radiating from the engine tile
+    var rings = el('div','position:absolute;left:50%;top:calc(50% - 11px);width:0;height:0;pointer-events:none');
+    [150,230,310].forEach(function(d,i){
+      rings.appendChild(el('div','position:absolute;left:'+(-d/2)+'px;top:'+(-d/2)+'px;width:'+d+'px;height:'+d+'px;border-radius:50%;border:1px solid '+(_L?'rgba(0,109,249,'+(0.15-0.045*i).toFixed(3)+')':'rgba(96,165,250,'+(0.17-0.05*i).toFixed(3)+')')));
+    });
+    panel.appendChild(rings);
+    // connecting arrows (drawn behind the cards; paths are measured from the
+    // real card/engine positions after layout instead of a stretched viewBox,
+    // so the heads stay crisp and land exactly on the edges)
+    var AR = _L ? 'rgba(0,109,249,0.45)' : 'rgba(96,165,250,0.55)';
+    var arrows = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none');
+    panel.appendChild(arrows);
+    // invoice cards — same invoice, before and after the engine
+    var hcCss = 'width:182px;box-sizing:border-box;background:'+(_L?'#ffffff':'#131a26')+';border:1px solid '+(_L?'rgba(15,23,42,0.06)':OL(0.08))+';border-radius:13px;padding:13px 14px;box-shadow:0 12px 28px '+(_L?'rgba(37,99,235,0.14)':'rgba(0,0,0,0.4)')+';text-align:left;position:relative;';
+    var lc = el('div', hcCss+'transform:translateY(20px)');
+    lc.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><span style="font-size:10.5px;font-weight:600;color:'+GRAY+'">INV-2041 · Stripe</span><span style="font-size:9.5px;font-weight:700;color:#ef4444;background:rgba(239,68,68,0.10);border-radius:999px;padding:2px 8px">Failed</span></div>'
+      +'<div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
+      +'<div style="font-size:9.8px;color:'+GRAY2+';margin-top:3px">Insufficient funds · Visa ··4242</div>';
+    var eng = el('div','display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;position:relative');
+    var tile = el('div','display:flex;align-items:center;justify-content:center;width:104px;height:104px;border-radius:26px;background:'+(_L?'#ffffff':'#0f1826')+';border:1px solid '+(_L?'rgba(15,23,42,0.05)':OL(0.08))+';box-shadow:0 18px 40px '+(_L?'rgba(37,99,235,0.18)':'rgba(0,0,0,0.5)')+', 0 0 0 10px '+(_L?'rgba(252,253,255,0.4)':OL(0.03)));
+    tile.innerHTML = '__RR_MARK_SVG__';
+    eng.appendChild(tile);
+    var rc = el('div', hcCss+'transform:translateY(-18px)');
+    rc.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px"><span style="font-size:10.5px;font-weight:600;color:'+GRAY+';white-space:nowrap">INV-2041 · Stripe</span><span style="font-size:9.5px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.12);border-radius:999px;padding:2px 7px;white-space:nowrap;flex-shrink:0">Recovered</span></div>'
+      +'<div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
+      +'<div style="font-size:9.8px;color:'+GRAY2+';margin-top:3px">Paid · retry #2 · Visa ··4242</div>';
+    var heroRow = el('div','position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px');
+    heroRow.appendChild(lc); heroRow.appendChild(eng); heroRow.appendChild(rc);
+    panel.appendChild(heroRow);
+    art.appendChild(panel);
+    function drawArrows(){
+      var pr = panel.getBoundingClientRect();
+      if(!pr.width){ return; }
+      function rel(node){
+        var r = node.getBoundingClientRect();
+        return {l:r.left-pr.left, r:r.right-pr.left, cy:(r.top+r.bottom)/2-pr.top};
+      }
+      var L = rel(lc), T = rel(tile), R = rel(rc);
+      var p1 = 'M '+(L.r+3)+' '+L.cy+' C '+(L.r+36)+' '+L.cy+', '+(T.l-36)+' '+T.cy+', '+(T.l-8)+' '+T.cy;
+      var p2 = 'M '+(T.r+3)+' '+T.cy+' C '+(T.r+36)+' '+T.cy+', '+(R.l-36)+' '+R.cy+', '+(R.l-8)+' '+R.cy;
+      arrows.innerHTML =
+        '<svg width="'+pr.width+'" height="'+pr.height+'" viewBox="0 0 '+pr.width+' '+pr.height+'" xmlns="http://www.w3.org/2000/svg">'
+        +'<defs><marker id="rr-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="'+AR+'"/></marker></defs>'
+        +'<path d="'+p1+'" fill="none" stroke="'+AR+'" stroke-width="2" stroke-linecap="round" marker-end="url(#rr-arr)"/>'
+        +'<path d="'+p2+'" fill="none" stroke="'+AR+'" stroke-width="2" stroke-linecap="round" marker-end="url(#rr-arr)"/>'
+        +'</svg>';
+    }
+    setTimeout(drawArrows, 0);
+    setTimeout(drawArrows, 150);
+    if(window.rrArrowResize) window.removeEventListener('resize', window.rrArrowResize);
+    window.rrArrowResize = drawArrows;
+    window.addEventListener('resize', drawArrows);
+    // header + sub-header sit below the illustration, on a wider text column
+    var h1 = el('h1','font-size:34px;font-weight:700;color:'+TEXT+';letter-spacing:-0.02em;line-height:1.2;margin:0 0 14px;text-align:center;max-width:460px');
+    h1.textContent = 'Revenue Recovery';
+    var subp = el('p','font-size:15px;color:'+GRAY+';line-height:1.6;margin:0 0 28px;text-align:center;max-width:520px');
+    subp.textContent = 'See how subscription businesses recover revenue from failed invoices and recurring payment failures.';
+    var cta = btn('Explore demo','padding:10px 24px;border-radius:9px;border:none;background:'+BRAND+';color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(0,109,249,0.25);transition:transform .15s ease,box-shadow .15s ease',
       function(){ stepIndex=0; render(); });
-    var inner = el('div','text-align:center;max-width:460px;padding:0 24px');
-    inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
-    wrap.appendChild(logo); wrap.appendChild(inner);
+    cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };
+    cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 8px 20px rgba(0,109,249,0.25)'; };
+    var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
+    inner.appendChild(h1); inner.appendChild(subp); inner.appendChild(cta);
+    content.appendChild(art); content.appendChild(inner);
+    wrap.appendChild(content);
     shell.appendChild(wrap);
+    shell.appendChild(logo);
   }
 
   /* ── wizard ── */
   function renderWizard(){
-    // card wrapper — inset from edges on all sides
+    // card wrapper — inset from edges on all sides (reset the landing gradient)
+    shell.style.background = BG;
     shell.style.padding = '32px';
     var card = el('div','display:flex;flex-direction:column;width:100%;height:100%;border-radius:16px;border:1px solid '+BORDER+';overflow:hidden;box-sizing:border-box');
 
@@ -412,24 +606,32 @@ ONBOARDING = """<script>
     var title = el('span','font-size:16px;font-weight:700;color:'+TEXT);
     title.textContent = 'Revenue Recovery';
     topLeft.appendChild(backBtn); topLeft.appendChild(title);
-    var topRight = el('div','flex:1;background:#13181f;display:flex;align-items:center;justify-content:flex-end;padding:0 32px');
-    var skipBtn = btn('Skip setup','font-size:13px;font-weight:600;color:'+GRAY+';background:none;border:none;cursor:pointer;padding:6px 4px',
-      function(){
-        localStorage.setItem('rrSetupV2','1');
-        try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
-        location.reload();
-      });
-    skipBtn.onmouseenter = function(){ skipBtn.style.color = TEXT; };
-    skipBtn.onmouseleave = function(){ skipBtn.style.color = GRAY; };
-    topRight.appendChild(skipBtn);
+    var topRight = el('div','flex:1;background:#13181f');
     topbar.appendChild(topLeft); topbar.appendChild(topRight);
 
     // body
     var body = el('div','display:flex;flex:1;min-height:0;');
 
-    // stepper panel (dark)
-    var stepperPanel = el('div','width:280px;flex-shrink:0;padding:24px 32px 32px;background:'+(_L?'#ffffff':BG));
+    // stepper panel (dark) — followed by a separator and a "go with default
+    // setup" action so it reads as part of the setup flow, not a stray link
+    // floating in the header.
+    var stepperPanel = el('div','width:280px;flex-shrink:0;padding:24px 32px 32px;background:'+(_L?'#ffffff':BG)+';display:flex;flex-direction:column');
     renderStepper(stepperPanel);
+    var skipSep = el('div','height:1px;background:'+BORDER+';margin:28px 0 20px');
+    var skipBg = _L ? CARD : 'rgba(255,255,255,0.035)';
+    var skipBgHover = _L ? '#f4f6f9' : 'rgba(255,255,255,0.07)';
+    var skipBtn = document.createElement('button');
+    skipBtn.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:11px;border:1px solid '+BORDER+';background:'+skipBg+';cursor:pointer;font-family:inherit;text-align:left;box-sizing:border-box;transition:background .15s ease;box-shadow:'+(_L?'0 1px 2px rgba(2,6,23,0.05)':'none');
+    skipBtn.innerHTML =
+      '<span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;background:rgba(0,109,249,0.10);color:'+BRAND+';flex-shrink:0">'
+      +'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8L4.1 4.7c-.7-.4-1.6.1-1.6.9z"/><path d="M12.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8l-9.2-6.4c-.7-.4-1.6.1-1.6.9z"/></svg>'
+      +'</span>'
+      +'<span style="flex:1;font-size:12.5px;font-weight:600;color:'+TEXT+';white-space:nowrap">Go with default setup</span>'
+      +'<span style="color:'+GRAY2+';flex-shrink:0;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>';
+    skipBtn.onclick = function(){ openDefaultSetupModal(); };
+    skipBtn.onmouseenter = function(){ skipBtn.style.background = skipBgHover; };
+    skipBtn.onmouseleave = function(){ skipBtn.style.background = skipBg; };
+    stepperPanel.appendChild(skipSep); stepperPanel.appendChild(skipBtn);
 
     // content panel (lighter bg for depth)
     var contentPanel = el('div','flex:1;background:#13181f;border-left:1px solid '+BORDER+';padding:32px 40px;overflow-y:auto');
@@ -438,6 +640,72 @@ ONBOARDING = """<script>
     body.appendChild(stepperPanel); body.appendChild(contentPanel);
     card.appendChild(topbar); card.appendChild(body);
     shell.appendChild(card);
+  }
+
+  /* ── default-setup confirmation modal ── */
+  function openDefaultSetupModal(){
+    var defaults = [
+      {label:'Payment processor', value:'Stripe'},
+      {label:'Billing processor', value:'Chargebee'},
+      {label:'Retry policy', value:'After 3 days · up to 15 attempts'}
+    ];
+    var backdrop = el('div','position:fixed;inset:0;z-index:2147483647;background:rgba(8,9,10,0.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box');
+    backdrop.onclick = function(e){ if(e.target === backdrop) close(); };
+    var box = el('div','position:relative;width:100%;max-width:380px;background:'+CARD+';border:1px solid '+BORDER+';border-radius:14px;box-sizing:border-box;box-shadow:0 24px 60px rgba(0,0,0,0.35);overflow:hidden');
+    box.onclick = function(e){ e.stopPropagation(); };
+
+    // header — icon tile mirrors the trigger button for continuity
+    var head = el('div','display:flex;align-items:flex-start;gap:11px;padding:18px 20px 0;position:relative');
+    var hIcon = el('span','display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:rgba(0,109,249,0.10);border:1px solid rgba(0,109,249,0.18);color:'+BRAND+';flex-shrink:0');
+    hIcon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8L4.1 4.7c-.7-.4-1.6.1-1.6.9z"/><path d="M12.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8l-9.2-6.4c-.7-.4-1.6.1-1.6.9z"/></svg>';
+    var hText = el('div','flex:1;min-width:0');
+    var h = el('h2','font-size:15px;font-weight:700;color:'+TEXT+';margin:0 0 3px;letter-spacing:-0.01em');
+    h.textContent = 'Use default setup';
+    var sub = el('p','font-size:12px;color:'+GRAY+';line-height:1.5;margin:0');
+    sub.textContent = "We'll configure the demo with these defaults. Change any of this later from settings.";
+    hText.appendChild(h); hText.appendChild(sub);
+    var xBtn = btn('','position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;border:1px solid '+BORDER+';background:none;color:'+GRAY2+';cursor:pointer;padding:0',
+      function(){ close(); });
+    xBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    xBtn.onmouseenter = function(){ xBtn.style.color = TEXT; };
+    xBtn.onmouseleave = function(){ xBtn.style.color = GRAY2; };
+    head.appendChild(hIcon); head.appendChild(hText);
+    box.appendChild(head); box.appendChild(xBtn);
+
+    var list = el('div','margin:14px 20px 16px;border:1px solid '+BORDER+';border-radius:10px;overflow:hidden');
+    defaults.forEach(function(d, i){
+      var row = el('div','display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px'+(i?';border-top:1px solid '+BORDER:''));
+      var l = el('span','font-size:12px;color:'+GRAY+';white-space:nowrap');
+      l.textContent = d.label;
+      var v = el('span','font-size:12px;font-weight:600;color:'+TEXT+';text-align:right');
+      v.textContent = d.value;
+      row.appendChild(l); row.appendChild(v);
+      list.appendChild(row);
+    });
+    box.appendChild(list);
+
+    // footer band — stroked top edge, right-aligned compact actions
+    var foot = el('div','display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid '+BORDER+';background:'+(_L?'#f8fafc':OL(0.02)));
+    var cancelBtn = btn('Cancel','padding:8px 14px;border-radius:8px;border:1px solid '+BORDER+';background:'+CARD+';color:'+TEXT+';font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
+      function(){ close(); });
+    var confirmBtn = btn('Continue to demo →','padding:8px 16px;border-radius:8px;border:1px solid '+BRAND+';background:'+BRAND+';color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
+      function(){
+        localStorage.setItem('rrSetupV2','1');
+        // matches the defaults shown in the list above
+        try{ localStorage.setItem('rrPayProcessor','Stripe'); localStorage.setItem('rrBillProcessor','Chargebee'); }catch(e){}
+        try{ sessionStorage.setItem('rrInApp','1'); }catch(e){}
+        try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
+        location.reload();
+      });
+    foot.appendChild(cancelBtn); foot.appendChild(confirmBtn);
+    box.appendChild(foot);
+
+    function close(){ backdrop.remove(); document.removeEventListener('keydown', onKey); }
+    function onKey(e){ if(e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+
+    backdrop.appendChild(box);
+    document.body.appendChild(backdrop);
   }
 
   function renderStepper(container){
@@ -457,15 +725,18 @@ ONBOARDING = """<script>
         var lineTop = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';top:0;height:50%');
         rail.appendChild(lineTop);
       }
-      var lineBot = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
-      rail.appendChild(lineBot);
+      // no trailing line after the last group — it would dangle below the icon
+      if(gi < GROUPS.length-1 || (isActive && group.subs.length)){
+        var lineBot = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
+        rail.appendChild(lineBot);
+      }
 
       var dot = el('span','display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;border:1.5px solid '+BORDER+';background:'+CARD+';color:'+(isActive?GRAY:GRAY2)+';position:relative;z-index:1;flex-shrink:0');
       dot.innerHTML = isDone ? GROUP_ICONS.check : GROUP_ICONS[group.icon];
       if(isDone) dot.style.color = BRAND;
       rail.appendChild(dot);
 
-      var info = el('div','display:flex;align-items:center;flex:1;padding-left:14px;min-height:52px');
+      var info = el('div','display:flex;align-items:center;flex:1;padding-left:14px;min-height:64px');
       var label = el('span','font-size:13.5px;font-weight:600;color:'+(isActive||isDone?TEXT:GRAY2)+';flex:1');
       label.textContent = group.label;
       info.appendChild(label);
@@ -490,8 +761,11 @@ ONBOARDING = """<script>
 
           var subRail = el('div','width:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative');
           var st = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';top:0;height:50%');
-          var sb = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
-          subRail.appendChild(st); subRail.appendChild(sb);
+          subRail.appendChild(st);
+          if(!(gi === GROUPS.length-1 && si === group.steps.length-1)){
+            var sb = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
+            subRail.appendChild(sb);
+          }
 
           var subDot;
           if(isSubActive){
@@ -504,7 +778,7 @@ ONBOARDING = """<script>
           }
           subRail.appendChild(subDot);
 
-          var subInfo = el('div','display:flex;align-items:center;flex:1;padding-left:14px;min-height:32px');
+          var subInfo = el('div','display:flex;align-items:center;flex:1;padding-left:14px;min-height:40px');
           var subLabel = el('span','font-size:11.5px;font-weight:'+(isSubActive?600:500)+';color:'+(isSubActive?BRAND:GRAY2));
           subLabel.textContent = group.subs[si];
           subInfo.appendChild(subLabel);
@@ -752,6 +1026,15 @@ ONBOARDING = """<script>
       });
       container.appendChild(primaryBtn('Start exploring', false, function(){
         localStorage.setItem('rrSetupV2','1');
+        // carry the processors actually chosen in this wizard through to the
+        // Overview's "Merchant gateway" card, instead of leaving it hardcoded
+        try{
+          var payName = (PAY_PROCS.find(function(p){ return p.id===state.payProc; })||{}).name || 'Stripe';
+          var billName2 = (BILL_PROCS.find(function(p){ return p.id===state.billProc; })||{}).name || 'Chargebee';
+          localStorage.setItem('rrPayProcessor', payName);
+          localStorage.setItem('rrBillProcessor', billName2);
+        }catch(e){}
+        try{ sessionStorage.setItem('rrInApp','1'); }catch(e){}
         try{ localStorage.setItem('rrView','overview'); localStorage.removeItem('rrActiveTab'); }catch(e){}
         location.reload();
       }));
@@ -768,6 +1051,26 @@ _onb_head, _onb_body = ONBOARDING.split(_onb_marker, 1)
 _onb_body = re.sub(r'rgba\(255,255,255,([0-9.]+)\)', r"'+OL(\1)+'", _onb_body)
 _onb_body = _onb_body.replace('#13181f', "'+PANEL+'")
 ONBOARDING = _onb_head + _onb_marker + _onb_body
+
+# Inline the Juspay wordmark, made theme-aware: the "Juspay" text ships as
+# fill="white" (built for a dark bg) so it would vanish on our light default —
+# map it to currentColor (driven by the logo container's colour), and drop the
+# secondary word's light-grey to a neutral that reads on both themes. Collapse
+# whitespace so the markup is safe inside a single-quoted JS string.
+_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'juspay-logo.svg')
+with open(_logo_path, 'r', encoding='utf-8') as _lf:
+    _logo_svg = _lf.read()
+_logo_svg = _logo_svg.replace('fill="white"', 'fill="currentColor"').replace('#CBCACF', '#8a8f98')
+_logo_svg = re.sub(r'\s+', ' ', _logo_svg).strip()
+# give it a consistent render height regardless of the file's intrinsic px size
+_logo_svg = _logo_svg.replace('<svg width="228" height="25"', '<svg width="228" height="25" style="height:20px;width:auto;display:block"', 1)
+ONBOARDING = ONBOARDING.replace('__RR_LOGO_SVG__', _logo_svg)
+
+# Extract just the circular Juspay mark (the two blue paths) from the wordmark
+# for the hero illustration's engine tile.
+_mark_paths = re.findall(r'<path[^>]+fill="#(?:2B8EFF|0561E2)"[^>]*/>', _logo_svg)
+_mark_svg = '<svg width="44" height="44" viewBox="0 0 22.8 22.8" fill="none" xmlns="http://www.w3.org/2000/svg">' + ''.join(_mark_paths) + '</svg>'
+ONBOARDING = ONBOARDING.replace('__RR_MARK_SVG__', _mark_svg)
 
 html = html.replace('</body>', ONBOARDING + '</body>', 1)
 
@@ -1980,7 +2283,9 @@ SIMULATION_VIEW = r"""<script>
     }
     navItem.onclick=activateLiveFlow;
 
-    navContainer.appendChild(navItem);
+    // Insert Live Flow between Recovery overview and Recovery Simulation
+    // (swaps the 2nd/3rd tab order) instead of appending it last.
+    navContainer.insertBefore(navItem, simBtn);
 
     // Restore Live Flow immediately on load if it was the last active tab —
     // same persistence the real nav items get via rrView.
@@ -2112,8 +2417,10 @@ for _m in sorted(set(re.findall(r'(?:bg|border|text|ring)-white/\[0?\.[0-9]+\]',
 _theme_rules.append('html.rr-light body{background:#ffffff;color-scheme:light}')
 
 _THEME_CSS = '<style id="rr-theme-light">' + ''.join(_theme_rules) + '</style>'
-# Apply the persisted theme before first paint to avoid a flash.
-_THEME_BOOT = '<script>try{if(localStorage.getItem("rrTheme")==="light")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
+# Apply the persisted dashboard theme before first paint to avoid a flash.
+# Defaults to dark; only the in-dashboard toggle (writing rrDashTheme) can
+# opt into light, and that choice never reaches the landing/onboarding overlay.
+_THEME_BOOT = '<script>try{if(localStorage.getItem("rrDashTheme")==="light")document.documentElement.classList.add("rr-light")}catch(e){}</script>'
 html = html.replace('</head>', _THEME_CSS + _THEME_BOOT + '</head>', 1)
 
 # Write the built page to BOTH names:

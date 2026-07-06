@@ -2224,7 +2224,9 @@ SIMULATION_VIEW = r"""<script>
     }
     navItem.onclick=activateLiveFlow;
 
-    navContainer.appendChild(navItem);
+    // Insert Live Flow between Recovery overview and Recovery Simulation
+    // (swaps the 2nd/3rd tab order) instead of appending it last.
+    navContainer.insertBefore(navItem, simBtn);
 
     // Restore Live Flow immediately on load if it was the last active tab —
     // same persistence the real nav items get via rrView.

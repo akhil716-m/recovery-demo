@@ -408,14 +408,14 @@ ONBOARDING = """<script>
     var art = el('div','position:relative;width:100%;max-width:640px;margin:0 auto 34px;animation:rrFadeUp .6s ease .08s both');
     // the panel's washes mirror the story: a red tint under the failed card,
     // green under the recovered one, and a blue glow radiating from the engine
-    var panel = el('div','position:relative;border-radius:22px;padding:74px 34px;box-sizing:border-box;background:'
+    var panel = el('div','position:relative;border-radius:22px;padding:120px 34px;box-sizing:border-box;background:'
       +(_L
         ? 'radial-gradient(300px 200px at 16% 66%, rgba(239,68,68,0.06), transparent 70%), radial-gradient(300px 200px at 86% 34%, rgba(34,197,94,0.08), transparent 70%), radial-gradient(380px 260px at 50% 42%, rgba(0,109,249,0.13), transparent 72%), linear-gradient(180deg,#e7f0fe,#d5e5fc)'
         : 'radial-gradient(300px 200px at 16% 66%, rgba(239,68,68,0.10), transparent 70%), radial-gradient(300px 200px at 86% 34%, rgba(34,197,94,0.10), transparent 70%), radial-gradient(380px 260px at 50% 42%, rgba(0,109,249,0.22), transparent 72%), linear-gradient(180deg,#0d1522,#101b2e)')
       +';border:1px solid '+(_L?'rgba(15,23,42,0.04)':OL(0.06))+';overflow:hidden');
     // ghost side sheets cropped by the panel edges, for depth
-    panel.appendChild(el('div','position:absolute;left:-36px;top:40px;width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
-    panel.appendChild(el('div','position:absolute;right:-36px;top:28px;width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
+    panel.appendChild(el('div','position:absolute;left:-36px;top:50%;transform:translateY(-52%);width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
+    panel.appendChild(el('div','position:absolute;right:-36px;top:50%;transform:translateY(-46%);width:92px;height:168px;border-radius:14px;background:'+(_L?'rgba(252,253,255,0.55)':OL(0.04))));
     // concentric halo rings radiating from the engine tile
     var rings = el('div','position:absolute;left:50%;top:calc(50% - 11px);width:0;height:0;pointer-events:none');
     [150,230,310].forEach(function(d,i){

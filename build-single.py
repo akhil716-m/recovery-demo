@@ -405,7 +405,7 @@ ONBOARDING = """<script>
     shell.appendChild(blob1); shell.appendChild(blob2);
     // product-flavoured backdrop: dashboard grid, ghost invoice cards, and
     // dashed retry paths with payments travelling toward recovery
-    var flow1 = 'M -80 760 C 300 700, 600 810, 900 750 C 1200 690, 1400 730, 1720 700';
+    var flow1 = 'M -80 828 C 300 800, 620 856, 900 824 C 1180 792, 1400 844, 1720 812';
     var flow2 = 'M 1700 140 C 1350 190, 1050 110, 780 160 C 500 210, 260 150, -60 190';
     var bgsvg = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden');
     bgsvg.innerHTML =
@@ -416,30 +416,29 @@ ONBOARDING = """<script>
       +'<path d="'+flow2+'" fill="none" stroke="'+OL(0.10)+'" stroke-width="1.5" stroke-dasharray="4 10" style="animation:rrDash 40s linear infinite"/>'
       +'</svg>';
     shell.appendChild(bgsvg);
-    // bottom scatter: half-cropped invoice cards at uneven zigzag heights and
-    // slight tilts — read left to right the story goes failed → retrying →
-    // recovered, without looking like a structured marquee
-    var invs = [
-      ['Adyen','#0ABF53','INV-2087','$342.50','Failed',       '1.5%','-13px','-1.6deg',0.94],
-      ['Worldpay','#D71E28','INV-3308','$67.25','Failed',     '16.5%','-7px','1.1deg',1],
-      ['Chargebee','#FF6C36','INV-5531','$89.99','Retrying',  '33%','-14px','-1.3deg',0.94],
-      ['PayPal','#003087','INV-1266','$156.75','Retrying',    '50%','-8px','0.9deg',1],
-      ['Recurly','#7C3AED','INV-9174','$220.00','Recovered',  '67%','-12px','-1.1deg',0.96],
-      ['Braintree','#00A4DE','INV-7740','$415.00','Recovered','84%','-6px','1.4deg',1]
-    ];
+    // bottom band: ONE invoice's journey in three acts — the same payment
+    // failing, being retried, and coming back recovered. The dashed retry
+    // path threads the three cards together; no filler cards.
     var stCol = {Failed:['#ef4444','rgba(239,68,68,0.10)'], Retrying:['#006DF9','rgba(0,109,249,0.10)'], Recovered:['#16a34a','rgba(34,197,94,0.12)']};
-    invs.forEach(function(v){
-      var sc = stCol[v[4]];
-      var c = el('div','position:absolute;left:'+v[5]+';bottom:'+v[6]+';width:212px;box-sizing:border-box;transform:rotate('+v[7]+');opacity:'+v[8]+';background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 10px 28px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)')+';pointer-events:none');
+    var journey = [
+      ['Failed','Insufficient funds · Mon 09:14','8%','20px','-1deg'],
+      ['Retrying','Smart retry · attempt #2 · Wed 02:00','41.5%','26px','0.7deg'],
+      ['Recovered','Paid · Visa ··4242 · Fri 11:32','75%','18px','-0.8deg']
+    ];
+    journey.forEach(function(v){
+      var sc = stCol[v[0]];
+      var c = el('div','position:absolute;left:'+v[2]+';bottom:'+v[3]+';width:238px;box-sizing:border-box;transform:rotate('+v[4]+');background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 10px 28px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)')+';pointer-events:none');
       c.innerHTML =
-        '<div style="display:flex;align-items:center;gap:9px">'
-        +'<span style="width:26px;height:26px;border-radius:8px;background:'+v[1]+';color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+v[0].charAt(0)+'</span>'
-        +'<span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:'+TEXT+'">'+v[0]+'</span><span style="display:block;font-size:10px;color:'+GRAY2+'">'+v[2]+'</span></span>'
-        +'<span style="text-align:right"><span style="display:block;font-size:12.5px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">'+v[3]+'</span><span style="display:inline-block;margin-top:2px;font-size:9.5px;font-weight:700;color:'+sc[0]+';background:'+sc[1]+';border-radius:999px;padding:2px 7px">'+v[4]+'</span></span>'
-        +'</div>';
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<span style="width:24px;height:24px;border-radius:7px;background:#635BFF;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">S</span>'
+        +'<span style="flex:1;font-size:11px;font-weight:600;color:'+GRAY+'">INV-3308 · Stripe</span>'
+        +'<span style="font-size:9.5px;font-weight:700;color:'+sc[0]+';background:'+sc[1]+';border-radius:999px;padding:2px 8px">'+v[0]+'</span>'
+        +'</div>'
+        +'<div style="font-size:15px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$342.50</div>'
+        +'<div style="font-size:10px;color:'+GRAY2+';margin-top:2px">'+v[1]+'</div>';
       shell.appendChild(c);
     });
-    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 24px 76px;box-sizing:border-box');
+    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:24px 24px 108px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
@@ -460,7 +459,7 @@ ONBOARDING = """<script>
       +'<div style="font-size:17px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$197.00</div>'
       +'<div style="font-size:10.5px;color:'+GRAY2+';margin:3px 0 10px">Insufficient funds · Visa ··4242</div>'
       +'<span style="display:inline-block;font-size:10px;font-weight:600;color:'+BRAND+';background:rgba(0,109,249,0.10);border-radius:999px;padding:3px 9px">Retry #2 · in 3h</span>';
-    var card2 = el('div', cardBase+'right:-150px;top:-38px;width:180px;box-sizing:border-box');
+    var card2 = el('div', cardBase+'right:-150px;top:-26px;width:180px;box-sizing:border-box');
     card2.innerHTML =
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e"></span><span style="font-size:11px;font-weight:600;color:'+GRAY+'">Recovery rate</span></div>'
       +'<div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:20px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">87.4%</span><span style="font-size:10px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.10);border-radius:999px;padding:2px 7px">+12%</span></div>'

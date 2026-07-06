@@ -461,17 +461,17 @@ ONBOARDING = """<script>
     // floating in the header.
     var stepperPanel = el('div','width:280px;flex-shrink:0;padding:24px 32px 32px;background:'+(_L?'#ffffff':BG)+';display:flex;flex-direction:column');
     renderStepper(stepperPanel);
-    var skipSep = el('div','height:1px;background:'+BORDER+';margin:20px 0 16px');
-    var skipBg = _L ? '#f8f9fb' : 'rgba(255,255,255,0.035)';
-    var skipBgHover = _L ? '#eef1f6' : 'rgba(255,255,255,0.07)';
+    var skipSep = el('div','height:1px;background:'+BORDER+';margin:28px 0 20px');
+    var skipBg = _L ? CARD : 'rgba(255,255,255,0.035)';
+    var skipBgHover = _L ? '#f4f6f9' : 'rgba(255,255,255,0.07)';
     var skipBtn = document.createElement('button');
-    skipBtn.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;border:1px solid '+BORDER+';background:'+skipBg+';cursor:pointer;font-family:inherit;text-align:left;box-sizing:border-box;transition:background .15s ease';
+    skipBtn.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:11px;border:1px solid '+BORDER+';background:'+skipBg+';cursor:pointer;font-family:inherit;text-align:left;box-sizing:border-box;transition:background .15s ease;box-shadow:'+(_L?'0 1px 2px rgba(2,6,23,0.05)':'none');
     skipBtn.innerHTML =
-      '<span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:rgba(0,109,249,0.12);color:'+BRAND+';flex-shrink:0">'
-      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+      '<span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;background:rgba(0,109,249,0.10);color:'+BRAND+';flex-shrink:0">'
+      +'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8L4.1 4.7c-.7-.4-1.6.1-1.6.9z"/><path d="M12.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8l-9.2-6.4c-.7-.4-1.6.1-1.6.9z"/></svg>'
       +'</span>'
-      +'<span style="flex:1;font-size:12.5px;font-weight:600;color:'+TEXT+'">Go with default setup</span>'
-      +'<span style="color:'+GRAY2+';flex-shrink:0;display:flex"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>';
+      +'<span style="flex:1;font-size:12.5px;font-weight:600;color:'+TEXT+';white-space:nowrap">Go with default setup</span>'
+      +'<span style="color:'+GRAY2+';flex-shrink:0;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>';
     skipBtn.onclick = function(){ openDefaultSetupModal(); };
     skipBtn.onmouseenter = function(){ skipBtn.style.background = skipBgHover; };
     skipBtn.onmouseleave = function(){ skipBtn.style.background = skipBg; };
@@ -554,8 +554,11 @@ ONBOARDING = """<script>
         var lineTop = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';top:0;height:50%');
         rail.appendChild(lineTop);
       }
-      var lineBot = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
-      rail.appendChild(lineBot);
+      // no trailing line after the last group — it would dangle below the icon
+      if(gi < GROUPS.length-1 || (isActive && group.subs.length)){
+        var lineBot = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
+        rail.appendChild(lineBot);
+      }
 
       var dot = el('span','display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;border:1.5px solid '+BORDER+';background:'+CARD+';color:'+(isActive?GRAY:GRAY2)+';position:relative;z-index:1;flex-shrink:0');
       dot.innerHTML = isDone ? GROUP_ICONS.check : GROUP_ICONS[group.icon];
@@ -587,8 +590,11 @@ ONBOARDING = """<script>
 
           var subRail = el('div','width:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative');
           var st = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';top:0;height:50%');
-          var sb = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
-          subRail.appendChild(st); subRail.appendChild(sb);
+          subRail.appendChild(st);
+          if(!(gi === GROUPS.length-1 && si === group.steps.length-1)){
+            var sb = el('span','position:absolute;left:50%;width:1px;margin-left:-0.5px;background:'+BORDER+';bottom:0;height:50%');
+            subRail.appendChild(sb);
+          }
 
           var subDot;
           if(isSubActive){

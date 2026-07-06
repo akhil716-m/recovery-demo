@@ -81,6 +81,7 @@ _flat_rows = ('<style id="rr-flat-pipeline">'
   'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]{background:transparent!important;border:0!important;border-radius:8px;margin:0 8px!important}'
   'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:not(:last-child){border-bottom:1px solid rgba(255,255,255,0.055)!important;border-radius:0}'
   'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:hover{background:rgba(255,255,255,0.035)!important}'
+  'div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]>div{padding-top:11px!important;padding-bottom:11px!important}'
   'html.rr-light div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:not(:last-child){border-bottom:1px solid rgba(15,23,42,0.08)!important}'
   'html.rr-light div.mx-2.my-1.rounded-md.border.bg-\\[\\#0f1012\\]:hover{background:rgba(15,23,42,0.04)!important}'
   '</style>')

@@ -574,10 +574,10 @@ ONBOARDING = """<script>
     window.rrArrowResize = drawArrows;
     window.addEventListener('resize', drawArrows);
     // header + sub-header sit below the illustration, on a wider text column
-    var h1 = el('h1','font-size:30px;font-weight:700;color:'+TEXT+';letter-spacing:-0.02em;line-height:1.25;margin:0 0 14px;text-align:center;max-width:560px');
-    h1.innerHTML = 'Understanding how failed invoices get <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">recovered</span>';
-    var subp = el('p','font-size:15px;color:'+GRAY+';line-height:1.6;margin:0 0 28px;text-align:center;max-width:540px');
-    subp.textContent = 'An interactive walkthrough of how Hyperswitch Revenue Recovery helps subscription businesses recover revenue from failed payments.';
+    var h1 = el('h1','font-size:34px;font-weight:700;color:'+TEXT+';letter-spacing:-0.02em;line-height:1.2;margin:0 0 14px;text-align:center;max-width:460px');
+    h1.innerHTML = 'Revenue <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Recovery</span>';
+    var subp = el('p','font-size:15px;color:'+GRAY+';line-height:1.6;margin:0 0 28px;text-align:center;max-width:520px');
+    subp.textContent = 'Explore how subscription businesses recover revenue from failed invoices and recurring payment failures.';
     var cta = btn('Explore demo','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(0,109,249,0.25);transition:transform .15s ease,box-shadow .15s ease',
       function(){ stepIndex=0; render(); });
     cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };

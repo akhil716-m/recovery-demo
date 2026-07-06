@@ -525,15 +525,11 @@ ONBOARDING = """<script>
       rings.appendChild(el('div','position:absolute;left:'+(-d/2)+'px;top:'+(-d/2)+'px;width:'+d+'px;height:'+d+'px;border-radius:50%;border:1px solid '+(_L?'rgba(0,109,249,'+(0.15-0.045*i).toFixed(3)+')':'rgba(96,165,250,'+(0.17-0.05*i).toFixed(3)+')')));
     });
     panel.appendChild(rings);
-    // connecting arrows (drawn behind the cards)
+    // connecting arrows (drawn behind the cards; paths are measured from the
+    // real card/engine positions after layout instead of a stretched viewBox,
+    // so the heads stay crisp and land exactly on the edges)
     var AR = _L ? 'rgba(0,109,249,0.45)' : 'rgba(96,165,250,0.55)';
     var arrows = el('div','position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none');
-    arrows.innerHTML =
-      '<svg width="100%" height="100%" viewBox="0 0 640 224" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">'
-      +'<defs><marker id="rr-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="'+AR+'"/></marker></defs>'
-      +'<path d="M218 138 C 246 138, 240 104, 264 104" fill="none" stroke="'+AR+'" stroke-width="2" marker-end="url(#rr-arr)"/>'
-      +'<path d="M376 104 C 402 104, 396 84, 420 84" fill="none" stroke="'+AR+'" stroke-width="2" marker-end="url(#rr-arr)"/>'
-      +'</svg>';
     panel.appendChild(arrows);
     // invoice cards — same invoice, before and after the engine
     var hcCss = 'width:182px;box-sizing:border-box;background:'+(_L?'#ffffff':'#131a26')+';border:1px solid '+(_L?'rgba(15,23,42,0.06)':OL(0.08))+';border-radius:13px;padding:13px 14px;box-shadow:0 12px 28px '+(_L?'rgba(37,99,235,0.14)':'rgba(0,0,0,0.4)')+';text-align:left;position:relative;';
@@ -555,6 +551,28 @@ ONBOARDING = """<script>
     heroRow.appendChild(lc); heroRow.appendChild(eng); heroRow.appendChild(rc);
     panel.appendChild(heroRow);
     art.appendChild(panel);
+    function drawArrows(){
+      var pr = panel.getBoundingClientRect();
+      if(!pr.width){ return; }
+      function rel(node){
+        var r = node.getBoundingClientRect();
+        return {l:r.left-pr.left, r:r.right-pr.left, cy:(r.top+r.bottom)/2-pr.top};
+      }
+      var L = rel(lc), T = rel(tile), R = rel(rc);
+      var p1 = 'M '+(L.r+3)+' '+L.cy+' C '+(L.r+36)+' '+L.cy+', '+(T.l-36)+' '+T.cy+', '+(T.l-8)+' '+T.cy;
+      var p2 = 'M '+(T.r+3)+' '+T.cy+' C '+(T.r+36)+' '+T.cy+', '+(R.l-36)+' '+R.cy+', '+(R.l-8)+' '+R.cy;
+      arrows.innerHTML =
+        '<svg width="'+pr.width+'" height="'+pr.height+'" viewBox="0 0 '+pr.width+' '+pr.height+'" xmlns="http://www.w3.org/2000/svg">'
+        +'<defs><marker id="rr-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="'+AR+'"/></marker></defs>'
+        +'<path d="'+p1+'" fill="none" stroke="'+AR+'" stroke-width="2" stroke-linecap="round" marker-end="url(#rr-arr)"/>'
+        +'<path d="'+p2+'" fill="none" stroke="'+AR+'" stroke-width="2" stroke-linecap="round" marker-end="url(#rr-arr)"/>'
+        +'</svg>';
+    }
+    setTimeout(drawArrows, 0);
+    setTimeout(drawArrows, 150);
+    if(window.rrArrowResize) window.removeEventListener('resize', window.rrArrowResize);
+    window.rrArrowResize = drawArrows;
+    window.addEventListener('resize', drawArrows);
     // header + sub-header sit below the illustration, on a wider text column
     var h1 = el('h1','font-size:32px;font-weight:700;color:'+TEXT+';letter-spacing:-0.02em;line-height:1.2;margin:0 0 14px;text-align:center;max-width:460px');
     h1.innerHTML = 'Recover revenue from <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">failed payments</span>';

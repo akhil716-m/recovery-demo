@@ -494,7 +494,7 @@ ONBOARDING = """<script>
     // hero illustration — custom composition instead of a baked PNG: the same
     // invoice enters failed on the left, passes through the Juspay retry
     // engine, and exits recovered on the right.
-    var art = el('div','position:relative;width:100%;max-width:640px;margin:0 auto 34px;animation:rrFadeUp .6s ease .08s both');
+    var art = el('div','position:relative;width:100%;max-width:640px;margin:0 auto 58px;animation:rrFadeUp .6s ease .08s both');
     // no container box: the story washes (red under the failed card, green
     // under the recovered one, blue radiating from the engine) live on a
     // bleed layer that extends past the composition and fades out on all
@@ -578,7 +578,7 @@ ONBOARDING = """<script>
     h1.textContent = 'Revenue Recovery';
     var subp = el('p','font-size:15px;color:'+GRAY+';line-height:1.6;margin:0 0 28px;text-align:center;max-width:520px');
     subp.textContent = 'See how subscription businesses recover revenue from failed invoices and recurring payment failures.';
-    var cta = btn('Explore demo','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(0,109,249,0.25);transition:transform .15s ease,box-shadow .15s ease',
+    var cta = btn('Explore demo','padding:10px 24px;border-radius:9px;border:none;background:'+BRAND+';color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(0,109,249,0.25);transition:transform .15s ease,box-shadow .15s ease',
       function(){ stepIndex=0; render(); });
     cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };
     cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 8px 20px rgba(0,109,249,0.25)'; };

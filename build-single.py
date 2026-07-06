@@ -506,9 +506,7 @@ ONBOARDING = """<script>
     var eng = el('div','display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;position:relative');
     var tile = el('div','display:flex;align-items:center;justify-content:center;width:104px;height:104px;border-radius:26px;background:'+(_L?'#ffffff':'#0f1826')+';border:1px solid '+(_L?'rgba(15,23,42,0.05)':OL(0.08))+';box-shadow:0 18px 40px '+(_L?'rgba(37,99,235,0.18)':'rgba(0,0,0,0.5)')+', 0 0 0 10px '+(_L?'rgba(252,253,255,0.4)':OL(0.03)));
     tile.innerHTML = '__RR_MARK_SVG__';
-    var engLbl = el('div','font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:'+(_L?'#7186a3':GRAY2));
-    engLbl.textContent = 'Smart retry engine';
-    eng.appendChild(tile); eng.appendChild(engLbl);
+    eng.appendChild(tile);
     var rc = el('div', hcCss+'transform:translateY(-18px)');
     rc.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px"><span style="font-size:10.5px;font-weight:600;color:'+GRAY+';white-space:nowrap">INV-2041 · Stripe</span><span style="font-size:9.5px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.12);border-radius:999px;padding:2px 7px;white-space:nowrap;flex-shrink:0">Recovered</span></div>'
@@ -525,10 +523,8 @@ ONBOARDING = """<script>
       function(){ stepIndex=0; render(); });
     cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };
     cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 8px 20px rgba(0,109,249,0.25)'; };
-    var eyebrow = el('div','font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:'+GRAY2+';margin-bottom:14px');
-    eyebrow.textContent = 'Revenue Recovery';
     var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
-    inner.appendChild(eyebrow); inner.appendChild(h1); inner.appendChild(cta);
+    inner.appendChild(h1); inner.appendChild(cta);
     content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
     shell.appendChild(wrap);

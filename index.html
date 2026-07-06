@@ -576,9 +576,7 @@
     var eng = el('div','display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;position:relative');
     var tile = el('div','display:flex;align-items:center;justify-content:center;width:104px;height:104px;border-radius:26px;background:'+(_L?'#ffffff':'#0f1826')+';border:1px solid '+(_L?'rgba(15,23,42,0.05)':OL(0.08))+';box-shadow:0 18px 40px '+(_L?'rgba(37,99,235,0.18)':'rgba(0,0,0,0.5)')+', 0 0 0 10px '+(_L?'rgba(252,253,255,0.4)':OL(0.03)));
     tile.innerHTML = '<svg width="44" height="44" viewBox="0 0 22.8 22.8" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.3301 22.7326C10.7855 22.7478 10.2561 22.7023 9.7115 22.6265C8.24421 22.4144 6.86768 21.9446 5.59704 21.1718C2.78348 19.4746 0.983408 17.0046 0.242201 13.7617C0.0758079 13.0344 0.000174532 12.2919 0.000174532 11.5493C-0.0149521 8.57925 0.953155 5.97285 2.91962 3.76043C4.62894 1.85109 6.74667 0.684273 9.24257 0.199361C9.9384 0.0629794 10.6342 -0.0127882 11.3301 0.0175188C11.3301 1.15403 11.3301 2.27539 11.3301 3.4119C11.2998 3.42706 11.2695 3.44221 11.2393 3.47252C10.8309 3.76043 10.4225 4.0635 10.0292 4.38173C9.13668 5.1091 8.28959 5.88192 7.57864 6.80629C6.62566 8.03372 5.99034 9.38238 5.89958 10.9735C5.8542 11.7312 5.94496 12.4737 6.18698 13.1859C6.77692 14.9589 8.60725 16.7924 11.1788 16.8379C11.3301 16.8379 11.3603 16.8682 11.3603 17.0349C11.3452 17.8077 11.3452 19.3534 11.3452 19.3534C11.3452 19.3534 11.3452 19.4443 11.3452 19.4898C11.3301 20.5657 11.3301 21.6416 11.3301 22.7326Z" fill="#2B8EFF"/><path fill-rule="evenodd" clip-rule="evenodd" d="M11.3298 3.39671C11.3298 3.39671 11.3298 1.13883 11.3298 0.00232066C11.9499 -0.0128328 12.555 0.0477812 13.1601 0.138702C14.2946 0.320544 15.3837 0.653921 16.4123 1.18429C18.5452 2.2905 20.2242 3.86646 21.3587 6.01826C22.0092 7.26085 22.4327 8.5792 22.5991 9.95817C22.7958 11.5796 22.6445 13.1859 22.1604 14.7467C21.6008 16.5196 20.6629 18.0804 19.3469 19.3988C17.7435 20.9899 15.8375 22.0204 13.629 22.4901C12.8727 22.6417 12.1012 22.7326 11.3298 22.7174C11.3298 21.6264 11.3298 20.5505 11.3298 19.4594C11.3298 19.414 11.3298 19.3382 11.3298 19.3382C11.3298 19.3382 11.3751 19.3079 11.3903 19.2927C12.5701 18.4593 13.6895 17.5501 14.6576 16.459C15.2929 15.7468 15.8375 14.9891 16.2157 14.1102C16.7451 12.8676 16.9569 11.5947 16.6846 10.2461C16.2005 7.79122 14.0072 5.95765 11.481 5.89703C11.3146 5.89703 11.3298 5.76065 11.3298 5.76065V3.39671Z" fill="#0561E2"/></svg>';
-    var engLbl = el('div','font-size:9.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:'+(_L?'#7186a3':GRAY2));
-    engLbl.textContent = 'Smart retry engine';
-    eng.appendChild(tile); eng.appendChild(engLbl);
+    eng.appendChild(tile);
     var rc = el('div', hcCss+'transform:translateY(-18px)');
     rc.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px"><span style="font-size:10.5px;font-weight:600;color:'+GRAY+';white-space:nowrap">INV-2041 · Stripe</span><span style="font-size:9.5px;font-weight:700;color:#16a34a;background:rgba(34,197,94,0.12);border-radius:999px;padding:2px 7px;white-space:nowrap;flex-shrink:0">Recovered</span></div>'
@@ -595,10 +593,8 @@
       function(){ stepIndex=0; render(); });
     cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };
     cta.onmouseleave = function(){ cta.style.transform=''; cta.style.boxShadow='0 8px 20px rgba(0,109,249,0.25)'; };
-    var eyebrow = el('div','font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:'+GRAY2+';margin-bottom:14px');
-    eyebrow.textContent = 'Revenue Recovery';
     var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
-    inner.appendChild(eyebrow); inner.appendChild(h1); inner.appendChild(cta);
+    inner.appendChild(h1); inner.appendChild(cta);
     content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
     shell.appendChild(wrap);

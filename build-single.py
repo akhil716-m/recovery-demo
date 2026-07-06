@@ -93,6 +93,29 @@ html = html.replace('</head>', _flat_rows + '</head>', 1)
 
 ONBOARDING = """<script>
 (function(){
+  // Every ship this session has changed what our own localStorage/
+  // sessionStorage keys mean -- a browser that's been open across many of
+  // our deploys can carry a mix of old and new 'rr*' values that no longer
+  // match what the current build expects (this is why incognito, which
+  // always starts clean, behaved fine while a long-lived regular profile
+  // didn't). Stamp each build; if a visitor's storage doesn't match the
+  // current stamp, wipe every 'rr*' key once before anything else runs, so
+  // each new deploy always gets a guaranteed-clean slate regardless of
+  // what accumulated before it.
+  try{
+    var BUILD_V = '__RR_BUILD_VERSION__';
+    if(localStorage.getItem('rrBuildVersion') !== BUILD_V){
+      var _rrKeys = [];
+      for(var _i=0;_i<localStorage.length;_i++){
+        var _k = localStorage.key(_i);
+        if(_k && _k.indexOf('rr') === 0) _rrKeys.push(_k);
+      }
+      _rrKeys.forEach(function(k){ localStorage.removeItem(k); });
+      try{ sessionStorage.clear(); }catch(e){}
+      localStorage.setItem('rrBuildVersion', BUILD_V);
+    }
+  }catch(e){}
+
   // Landing + onboarding are always dark, independent of whatever the user
   // picks once inside the dashboard. The dashboard's own preference lives in
   // a separate key (rrDashTheme) and never reaches back out to these surfaces
@@ -1071,6 +1094,14 @@ ONBOARDING = ONBOARDING.replace('__RR_LOGO_SVG__', _logo_svg)
 _mark_paths = re.findall(r'<path[^>]+fill="#(?:2B8EFF|0561E2)"[^>]*/>', _logo_svg)
 _mark_svg = '<svg width="44" height="44" viewBox="0 0 22.8 22.8" fill="none" xmlns="http://www.w3.org/2000/svg">' + ''.join(_mark_paths) + '</svg>'
 ONBOARDING = ONBOARDING.replace('__RR_MARK_SVG__', _mark_svg)
+
+# Stamp this exact build so returning browsers can detect "my stored rr*
+# state predates this deploy" and self-wipe (see the version-gate at the
+# top of ONBOARDING). Hashing the fully-substituted script means the stamp
+# changes automatically whenever anything in it changes -- no manual bump.
+import hashlib
+_build_version = hashlib.sha256(ONBOARDING.encode('utf-8')).hexdigest()[:12]
+ONBOARDING = ONBOARDING.replace('__RR_BUILD_VERSION__', _build_version)
 
 html = html.replace('</body>', ONBOARDING + '</body>', 1)
 

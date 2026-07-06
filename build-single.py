@@ -419,16 +419,19 @@ ONBOARDING = """<script>
     logo.innerHTML = '__RR_LOGO_SVG__';
     // hero illustration — static and framed; the story details live in the
     // three-act journey along the bottom
-    var art = el('div','position:relative;width:100%;max-width:380px;margin:0 auto 26px;animation:rrFadeUp .6s ease .08s both');
+    var art = el('div','position:relative;width:100%;max-width:380px;margin:0 auto 26px;animation:rrFadeUp .6s ease .08s both;filter:drop-shadow(0 16px 30px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)')+')');
+    // the PNG already has its own rounded corners baked in (transparent
+    // outside the card shape, measured at ~6.5%/9% of width/height). A frame
+    // div clipped to that same curvature — instead of a guessed px radius on
+    // the <img> — lets the border sit exactly on the real card edge rather
+    // than mismatching it.
+    var frame = el('div','overflow:hidden;border-radius:6.5%/9%;border:1px solid '+(_L?'rgba(15,23,42,0.14)':'rgba(255,255,255,0.16)')+';line-height:0');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';
-    // the PNG already has its own rounded corners baked in (transparent
-    // outside the card shape) — clipping it again with a CSS border-radius
-    // exposes a mismatched second curve at the corners, so we only add a
-    // shape-following drop-shadow here instead of a box-shadow + radius.
-    img.style.cssText = 'display:block;width:100%;height:auto;filter:drop-shadow(0 16px 30px '+(_L?'rgba(2,6,23,0.10)':'rgba(0,0,0,0.45)')+')';
-    art.appendChild(img);
+    img.style.cssText = 'display:block;width:100%;height:auto';
+    frame.appendChild(img);
+    art.appendChild(frame);
     // header + sub-header sit below the illustration, on a wider text column
     var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 30px;text-align:center');
     h1.innerHTML = 'Recover failed payments with <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">intelligent retries</span>';

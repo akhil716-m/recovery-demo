@@ -420,17 +420,17 @@ ONBOARDING = """<script>
     // slight tilts — read left to right the story goes failed → retrying →
     // recovered, without looking like a structured marquee
     var invs = [
-      ['Adyen','#0ABF53','INV-2087','$342.50','Failed',       '1.5%','-36px','-3deg',0.8],
-      ['Worldpay','#D71E28','INV-3308','$67.25','Failed',     '16%','-10px','2deg',1],
-      ['Chargebee','#FF6C36','INV-5531','$89.99','Retrying',  '33%','-42px','-2deg',0.75],
-      ['PayPal','#003087','INV-1266','$156.75','Retrying',    '50%','-14px','1.5deg',0.95],
-      ['Recurly','#7C3AED','INV-9174','$220.00','Recovered',  '67%','-38px','-1.5deg',0.8],
-      ['Braintree','#00A4DE','INV-7740','$415.00','Recovered','84%','-8px','2.5deg',1]
+      ['Adyen','#0ABF53','INV-2087','$342.50','Failed',       '1.5%','-13px','-1.6deg',0.94],
+      ['Worldpay','#D71E28','INV-3308','$67.25','Failed',     '16.5%','-7px','1.1deg',1],
+      ['Chargebee','#FF6C36','INV-5531','$89.99','Retrying',  '33%','-14px','-1.3deg',0.94],
+      ['PayPal','#003087','INV-1266','$156.75','Retrying',    '50%','-8px','0.9deg',1],
+      ['Recurly','#7C3AED','INV-9174','$220.00','Recovered',  '67%','-12px','-1.1deg',0.96],
+      ['Braintree','#00A4DE','INV-7740','$415.00','Recovered','84%','-6px','1.4deg',1]
     ];
     var stCol = {Failed:['#ef4444','rgba(239,68,68,0.10)'], Retrying:['#006DF9','rgba(0,109,249,0.10)'], Recovered:['#16a34a','rgba(34,197,94,0.12)']};
     invs.forEach(function(v){
       var sc = stCol[v[4]];
-      var c = el('div','position:absolute;left:'+v[5]+';bottom:'+v[6]+';width:212px;box-sizing:border-box;transform:rotate('+v[7]+');opacity:'+v[8]+';background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 -8px 24px '+(_L?'rgba(2,6,23,0.06)':'rgba(0,0,0,0.35)')+';pointer-events:none');
+      var c = el('div','position:absolute;left:'+v[5]+';bottom:'+v[6]+';width:212px;box-sizing:border-box;transform:rotate('+v[7]+');opacity:'+v[8]+';background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 10px 28px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)')+';pointer-events:none');
       c.innerHTML =
         '<div style="display:flex;align-items:center;gap:9px">'
         +'<span style="width:26px;height:26px;border-radius:8px;background:'+v[1]+';color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+v[0].charAt(0)+'</span>'

@@ -505,29 +505,7 @@
       +'<path d="'+flow2+'" fill="none" stroke="'+OL(0.10)+'" stroke-width="1.5" stroke-dasharray="4 10" style="animation:rrDash 40s linear infinite"/>'
       +'</svg>';
     shell.appendChild(bgsvg);
-    // bottom band: ONE invoice's journey in three acts — the same payment
-    // failing, being retried, and coming back recovered. The dashed retry
-    // path threads the three cards together; no filler cards.
-    var stCol = {Failed:['#ef4444','rgba(239,68,68,0.10)'], Retrying:['#006DF9','rgba(0,109,249,0.10)'], Recovered:['#16a34a','rgba(34,197,94,0.12)']};
-    var journey = [
-      ['Failed','Insufficient funds · Mon 09:14','8%','20px','-1deg'],
-      ['Retrying','Smart retry · attempt #2 · Wed 02:00','41.5%','26px','0.7deg'],
-      ['Recovered','Paid · Visa ··4242 · Fri 11:32','75%','18px','-0.8deg']
-    ];
-    journey.forEach(function(v){
-      var sc = stCol[v[0]];
-      var c = el('div','position:absolute;left:'+v[2]+';bottom:'+v[3]+';width:238px;box-sizing:border-box;transform:rotate('+v[4]+');background:'+(_L?'#ffffff':'#11161d')+';border:1px solid '+BORDER+';border-radius:12px;padding:12px 14px;box-shadow:0 10px 28px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)')+';pointer-events:none');
-      c.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
-        +'<span style="width:24px;height:24px;border-radius:7px;background:#635BFF;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">S</span>'
-        +'<span style="flex:1;font-size:11px;font-weight:600;color:'+GRAY+'">INV-3308 · Stripe</span>'
-        +'<span style="font-size:9.5px;font-weight:700;color:'+sc[0]+';background:'+sc[1]+';border-radius:999px;padding:2px 8px">'+v[0]+'</span>'
-        +'</div>'
-        +'<div style="font-size:15px;font-weight:700;letter-spacing:-0.01em;color:'+TEXT+'">$342.50</div>'
-        +'<div style="font-size:10px;color:'+GRAY2+';margin-top:2px">'+v[1]+'</div>';
-      shell.appendChild(c);
-    });
-    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px 24px 108px;box-sizing:border-box');
+    var wrap = el('div','position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding:24px;box-sizing:border-box');
     // margin:auto centres the column vertically when it fits, yet lets it
     // scroll (instead of clipping the top) on short viewports.
     var content = el('div','margin:auto;display:flex;flex-direction:column;align-items:center;width:100%');
@@ -542,10 +520,8 @@
     img.style.cssText = 'display:block;width:100%;height:auto;border-radius:16px;border:1px solid '+BORDER+';box-shadow:0 16px 44px '+(_L?'rgba(2,6,23,0.08)':'rgba(0,0,0,0.40)');
     art.appendChild(img);
     // header + sub-header sit below the illustration, on a wider text column
-    var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 14px;text-align:center');
+    var h1 = el('h1','font-size:40px;font-weight:700;color:'+TEXT+';letter-spacing:-0.03em;line-height:1.15;margin:0 0 30px;text-align:center');
     h1.innerHTML = 'Recover failed payments with <span style="background:linear-gradient(90deg,'+BRAND+',#33A0FF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">intelligent retries</span>';
-    var p = el('p','font-size:16px;color:'+GRAY+';line-height:1.6;margin:0 0 26px;text-align:center;max-width:560px');
-    p.textContent = 'ML-powered retry engine that minimizes involuntary churn and uplifts your authorization rate automatically.';
     var cta = btn('Explore dashboard →','padding:14px 36px;border-radius:10px;border:none;background:'+BRAND+';color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(0,109,249,0.25);transition:transform .15s ease,box-shadow .15s ease',
       function(){ stepIndex=0; render(); });
     cta.onmouseenter = function(){ cta.style.transform='translateY(-1px)'; cta.style.boxShadow='0 12px 28px rgba(0,109,249,0.35)'; };
@@ -553,7 +529,7 @@
     var eyebrow = el('div','font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:'+GRAY2+';margin-bottom:14px');
     eyebrow.textContent = 'Revenue Recovery';
     var inner = el('div','display:flex;flex-direction:column;align-items:center;text-align:center;max-width:620px;animation:rrFadeUp .6s ease .16s both');
-    inner.appendChild(eyebrow); inner.appendChild(h1); inner.appendChild(p); inner.appendChild(cta);
+    inner.appendChild(eyebrow); inner.appendChild(h1); inner.appendChild(cta);
     content.appendChild(art); content.appendChild(inner);
     wrap.appendChild(content);
     shell.appendChild(wrap);

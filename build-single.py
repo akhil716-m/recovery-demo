@@ -425,7 +425,7 @@ ONBOARDING = """<script>
     // div clipped to that same curvature — instead of a guessed px radius on
     // the <img> — lets the border sit exactly on the real card edge rather
     // than mismatching it.
-    var frame = el('div','overflow:hidden;border-radius:6.5%/9%;border:1px solid '+(_L?'rgba(15,23,42,0.14)':'rgba(255,255,255,0.16)')+';line-height:0');
+    var frame = el('div','overflow:hidden;border-radius:6.5%/9%;border:1px solid '+(_L?'rgba(15,23,42,0.06)':'rgba(255,255,255,0.09)')+';line-height:0');
     var img = document.createElement('img');
     img.src = '__RR_HERO_SRC__';
     img.alt = 'Failed payments recovered through the recovery engine';

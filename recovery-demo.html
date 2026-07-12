@@ -173,7 +173,7 @@
   // each new deploy always gets a guaranteed-clean slate regardless of
   // what accumulated before it.
   try{
-    var BUILD_V = 'c573a59d559d';
+    var BUILD_V = '7a335357e983';
     if(localStorage.getItem('rrBuildVersion') !== BUILD_V){
       var _rrKeys = [];
       for(var _i=0;_i<localStorage.length;_i++){
@@ -250,7 +250,7 @@
     exit.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
     exit.onmouseenter = function(){ exit.style.color=TEXT; };
     exit.onmouseleave = function(){ exit.style.color=GRAY2; };
-    exit.onclick = function(){ localStorage.removeItem('rrSetupV2'); try{ sessionStorage.removeItem('rrInApp'); }catch(e){} location.reload(); };
+    exit.onclick = function(){ localStorage.removeItem('rrSetupV2'); try{ sessionStorage.removeItem('rrInApp'); }catch(e){} try{ sessionStorage.removeItem('rrWizardProgress'); }catch(e){} location.reload(); };
     profile.appendChild(exit);
   }
 
@@ -448,12 +448,21 @@
     window.rrFixInline();
   }
 
-  // Show the landing page on every fresh URL entry. We only jump straight to
-  // the dashboard when the user has entered the app within this tab session
-  // (set on skip/complete/explore below), so reopening the URL always lands
-  // on the hero first.
-  var _inApp = (function(){ try{ return sessionStorage.getItem('rrInApp')==='1'; }catch(e){ return false; } })();
-  if(localStorage.getItem('rrSetupV2') && _inApp){
+  // Show the landing page on every load -- including a plain refresh. The
+  // dashboard is reached only via the one page load that immediately follows
+  // finishing (or skipping) onboarding: that transition sets rrInApp and
+  // reloads, and this flag is consumed (removed) the instant it's read, so
+  // it only ever satisfies that single load. Any load after that -- another
+  // refresh, reopening the tab, pasting the link again -- finds no flag and
+  // falls through to the landing page below.
+  var _justEntered = (function(){
+    try{
+      var v = sessionStorage.getItem('rrInApp')==='1';
+      if(v) sessionStorage.removeItem('rrInApp');
+      return v;
+    }catch(e){ return false; }
+  })();
+  if(localStorage.getItem('rrSetupV2') && _justEntered){
     addExitBtn(); watchExitBtn(); watchGradients();
     setTimeout(window.rrFixGradients, 50);
     setTimeout(window.rrFixGradients, 200);
@@ -559,8 +568,32 @@
     check:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
   };
 
+  // Persist in-progress wizard state (current step + entered fields) per tab
+  // so a reload mid-onboarding resumes exactly where the user left off,
+  // instead of dropping them back at the landing page. Cleared once setup
+  // finishes/is skipped (state.js) or the user exits back to landing.
+  function saveProgress(){
+    if(stepIndex === -1){ clearProgress(); return; }
+    try{ sessionStorage.setItem('rrWizardProgress', JSON.stringify({stepIndex:stepIndex, state:state})); }catch(e){}
+  }
+  function clearProgress(){
+    try{ sessionStorage.removeItem('rrWizardProgress'); }catch(e){}
+  }
+  (function restoreProgress(){
+    try{
+      var raw = sessionStorage.getItem('rrWizardProgress');
+      if(!raw) return;
+      var saved = JSON.parse(raw);
+      if(saved && typeof saved.stepIndex === 'number' && saved.stepIndex > -1 && saved.stepIndex < STEPS.length){
+        stepIndex = saved.stepIndex;
+        if(saved.state) for(var k in saved.state) state[k] = saved.state[k];
+      }
+    }catch(e){}
+  })();
+
   /* ── render ── */
   function render(){
+    saveProgress();
     shell.innerHTML = '';
     if(stepIndex === -1){ renderLanding(); } else { renderWizard(); }
   }
@@ -694,7 +727,7 @@
     var topbar = el('div','display:flex;align-items:stretch;flex-shrink:0;border-bottom:1px solid '+BORDER);
     var topLeft = el('div','display:flex;align-items:center;gap:12px;padding:24px 32px 20px;width:280px;flex-shrink:0;background:'+(_L?'#ffffff':BG)+';box-sizing:border-box');
     var backBtn = btn('','display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:none;background:none;color:'+TEXT+';cursor:pointer',
-      function(){ stepIndex > 0 ? (stepIndex--, render()) : (stepIndex=-1, render()); });
+      function(){ stepIndex > 0 ? (stepIndex--, render()) : (clearProgress(), stepIndex=-1, render()); });
     backBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>';
     var title = el('span','font-size:16px;font-weight:700;color:'+TEXT);
     title.textContent = 'Revenue Recovery';
@@ -747,25 +780,26 @@
     var box = el('div','position:relative;width:100%;max-width:380px;background:'+CARD+';border:1px solid '+BORDER+';border-radius:14px;box-sizing:border-box;box-shadow:0 24px 60px rgba(0,0,0,0.35);overflow:hidden');
     box.onclick = function(e){ e.stopPropagation(); };
 
-    // header — icon tile mirrors the trigger button for continuity
-    var head = el('div','display:flex;align-items:flex-start;gap:11px;padding:18px 20px 0;position:relative');
-    var hIcon = el('span','display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:rgba(0,109,249,0.10);border:1px solid rgba(0,109,249,0.18);color:'+BRAND+';flex-shrink:0');
+    // header — icon sits above the title/subtitle (rather than beside it) so
+    // every block in the modal -- title, subtitle, list, footer -- shares the
+    // same 20px left edge instead of the text trailing off wherever the icon
+    // happened to push it.
+    var head = el('div','padding:20px 20px 16px;position:relative');
+    var hIcon = el('span','display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:rgba(0,109,249,0.10);border:1px solid rgba(0,109,249,0.18);color:'+BRAND+';margin-bottom:12px');
     hIcon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8L4.1 4.7c-.7-.4-1.6.1-1.6.9z"/><path d="M12.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8l-9.2-6.4c-.7-.4-1.6.1-1.6.9z"/></svg>';
-    var hText = el('div','flex:1;min-width:0');
-    var h = el('h2','font-size:15px;font-weight:700;color:'+TEXT+';margin:0 0 3px;letter-spacing:-0.01em');
+    var h = el('h2','font-size:15px;font-weight:700;color:'+TEXT+';margin:0 0 4px;letter-spacing:-0.01em');
     h.textContent = 'Use default setup';
-    var sub = el('p','font-size:12px;color:'+GRAY+';line-height:1.5;margin:0');
-    sub.textContent = "We'll configure the demo with these defaults. Change any of this later from settings.";
-    hText.appendChild(h); hText.appendChild(sub);
+    var sub = el('p','font-size:12px;color:'+GRAY+';line-height:1.5;margin:0;max-width:300px');
+    sub.textContent = "We'll configure the demo with these defaults so you can start exploring right away.";
     var xBtn = btn('','position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;border:1px solid '+BORDER+';background:none;color:'+GRAY2+';cursor:pointer;padding:0',
       function(){ close(); });
     xBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     xBtn.onmouseenter = function(){ xBtn.style.color = TEXT; };
     xBtn.onmouseleave = function(){ xBtn.style.color = GRAY2; };
-    head.appendChild(hIcon); head.appendChild(hText);
+    head.appendChild(hIcon); head.appendChild(h); head.appendChild(sub);
     box.appendChild(head); box.appendChild(xBtn);
 
-    var list = el('div','margin:14px 20px 16px;border:1px solid '+BORDER+';border-radius:10px;overflow:hidden');
+    var list = el('div','margin:0 20px 16px;border:1px solid '+BORDER+';border-radius:10px;overflow:hidden');
     defaults.forEach(function(d, i){
       var row = el('div','display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px'+(i?';border-top:1px solid '+BORDER:''));
       var l = el('span','font-size:12px;color:'+GRAY+';white-space:nowrap');
@@ -781,8 +815,9 @@
     var foot = el('div','display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid '+BORDER+';background:'+(_L?'#f8fafc':OL(0.02)));
     var cancelBtn = btn('Cancel','padding:8px 14px;border-radius:8px;border:1px solid '+BORDER+';background:'+CARD+';color:'+TEXT+';font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
       function(){ close(); });
-    var confirmBtn = btn('Continue to demo →','padding:8px 16px;border-radius:8px;border:1px solid '+BRAND+';background:'+BRAND+';color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
+    var confirmBtn = btn('Continue to demo','padding:8px 16px;border-radius:8px;border:1px solid '+BRAND+';background:'+BRAND+';color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
       function(){
+        clearProgress();
         localStorage.setItem('rrSetupV2','1');
         // matches the defaults shown in the list above
         try{ localStorage.setItem('rrPayProcessor','Stripe'); localStorage.setItem('rrBillProcessor','Chargebee'); }catch(e){}
@@ -910,7 +945,7 @@
       i.value = val; i.placeholder = placeholder; i.type = type||'text';
       i.onfocus = function(){ i.style.borderColor=BRAND; i.style.boxShadow='0 0 0 3px rgba(0,109,249,0.15)'; };
       i.onblur = function(){ i.style.borderColor=''+OL(0.08)+''; i.style.boxShadow='none'; };
-      i.oninput = function(){ onchange(i.value); };
+      i.oninput = function(){ onchange(i.value); saveProgress(); };
       return i;
     }
 
@@ -1118,6 +1153,7 @@
         container.appendChild(row);
       });
       container.appendChild(primaryBtn('Start exploring', false, function(){
+        clearProgress();
         localStorage.setItem('rrSetupV2','1');
         // carry the processors actually chosen in this wizard through to the
         // Overview's "Merchant gateway" card, instead of leaving it hardcoded

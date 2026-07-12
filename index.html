@@ -173,7 +173,7 @@
   // each new deploy always gets a guaranteed-clean slate regardless of
   // what accumulated before it.
   try{
-    var BUILD_V = 'f2386a300034';
+    var BUILD_V = '4cb1f4f634ca';
     if(localStorage.getItem('rrBuildVersion') !== BUILD_V){
       var _rrKeys = [];
       for(var _i=0;_i<localStorage.length;_i++){
@@ -788,7 +788,7 @@
     var h = el('h2','font-size:15px;font-weight:700;color:'+TEXT+';margin:0 0 3px;letter-spacing:-0.01em');
     h.textContent = 'Use default setup';
     var sub = el('p','font-size:12px;color:'+GRAY+';line-height:1.5;margin:0');
-    sub.textContent = "We'll configure the demo with these defaults. Change any of this later from settings.";
+    sub.textContent = "We'll configure the demo with these defaults so you can start exploring right away.";
     hText.appendChild(h); hText.appendChild(sub);
     var xBtn = btn('','position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;border:1px solid '+BORDER+';background:none;color:'+GRAY2+';cursor:pointer;padding:0',
       function(){ close(); });

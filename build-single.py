@@ -710,25 +710,26 @@ ONBOARDING = """<script>
     var box = el('div','position:relative;width:100%;max-width:380px;background:'+CARD+';border:1px solid '+BORDER+';border-radius:14px;box-sizing:border-box;box-shadow:0 24px 60px rgba(0,0,0,0.35);overflow:hidden');
     box.onclick = function(e){ e.stopPropagation(); };
 
-    // header — icon tile mirrors the trigger button for continuity
-    var head = el('div','display:flex;align-items:flex-start;gap:11px;padding:18px 20px 0;position:relative');
-    var hIcon = el('span','display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:rgba(0,109,249,0.10);border:1px solid rgba(0,109,249,0.18);color:'+BRAND+';flex-shrink:0');
+    // header — icon sits above the title/subtitle (rather than beside it) so
+    // every block in the modal -- title, subtitle, list, footer -- shares the
+    // same 20px left edge instead of the text trailing off wherever the icon
+    // happened to push it.
+    var head = el('div','padding:20px 20px 16px;position:relative');
+    var hIcon = el('span','display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:rgba(0,109,249,0.10);border:1px solid rgba(0,109,249,0.18);color:'+BRAND+';margin-bottom:12px');
     hIcon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8L4.1 4.7c-.7-.4-1.6.1-1.6.9z"/><path d="M12.5 5.6v12.8c0 .8.9 1.3 1.6.9l9.2-6.4c.6-.4.6-1.4 0-1.8l-9.2-6.4c-.7-.4-1.6.1-1.6.9z"/></svg>';
-    var hText = el('div','flex:1;min-width:0');
-    var h = el('h2','font-size:15px;font-weight:700;color:'+TEXT+';margin:0 0 3px;letter-spacing:-0.01em');
+    var h = el('h2','font-size:15px;font-weight:700;color:'+TEXT+';margin:0 0 4px;letter-spacing:-0.01em');
     h.textContent = 'Use default setup';
-    var sub = el('p','font-size:12px;color:'+GRAY+';line-height:1.5;margin:0');
+    var sub = el('p','font-size:12px;color:'+GRAY+';line-height:1.5;margin:0;max-width:300px');
     sub.textContent = "We'll configure the demo with these defaults so you can start exploring right away.";
-    hText.appendChild(h); hText.appendChild(sub);
     var xBtn = btn('','position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;border:1px solid '+BORDER+';background:none;color:'+GRAY2+';cursor:pointer;padding:0',
       function(){ close(); });
     xBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     xBtn.onmouseenter = function(){ xBtn.style.color = TEXT; };
     xBtn.onmouseleave = function(){ xBtn.style.color = GRAY2; };
-    head.appendChild(hIcon); head.appendChild(hText);
+    head.appendChild(hIcon); head.appendChild(h); head.appendChild(sub);
     box.appendChild(head); box.appendChild(xBtn);
 
-    var list = el('div','margin:14px 20px 16px;border:1px solid '+BORDER+';border-radius:10px;overflow:hidden');
+    var list = el('div','margin:0 20px 16px;border:1px solid '+BORDER+';border-radius:10px;overflow:hidden');
     defaults.forEach(function(d, i){
       var row = el('div','display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px'+(i?';border-top:1px solid '+BORDER:''));
       var l = el('span','font-size:12px;color:'+GRAY+';white-space:nowrap');
@@ -744,7 +745,7 @@ ONBOARDING = """<script>
     var foot = el('div','display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid '+BORDER+';background:'+(_L?'#f8fafc':OL(0.02)));
     var cancelBtn = btn('Cancel','padding:8px 14px;border-radius:8px;border:1px solid '+BORDER+';background:'+CARD+';color:'+TEXT+';font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
       function(){ close(); });
-    var confirmBtn = btn('Continue to demo →','padding:8px 16px;border-radius:8px;border:1px solid '+BRAND+';background:'+BRAND+';color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
+    var confirmBtn = btn('Continue to demo','padding:8px 16px;border-radius:8px;border:1px solid '+BRAND+';background:'+BRAND+';color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit',
       function(){
         clearProgress();
         localStorage.setItem('rrSetupV2','1');

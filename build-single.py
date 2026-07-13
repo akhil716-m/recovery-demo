@@ -1100,7 +1100,27 @@ ONBOARDING = """<script>
     }
   }
 
-  setTimeout(function(){ document.body.appendChild(shell); render(); }, 50);
+  // Mount the shell and keep it mounted. A single fixed-delay setTimeout here
+  // used to be a race identical to the one already solved (and documented)
+  // for the nav-tab injection and gradient fixups below: on a slower device
+  // or a cold/no-store load, React's own hydration can still be settling the
+  // DOM when the timer fires, and the shell either never lands or gets
+  // wiped, silently leaving the raw dashboard visible with no landing page.
+  // Retry on a schedule and self-heal via a MutationObserver so this is
+  // resilient regardless of how long hydration takes.
+  function rrEnsureShell(){
+    if(!document.body.contains(shell)){
+      document.body.appendChild(shell);
+      render();
+    }
+  }
+  rrEnsureShell();
+  setTimeout(rrEnsureShell, 50);
+  setTimeout(rrEnsureShell, 300);
+  setTimeout(rrEnsureShell, 800);
+  setTimeout(rrEnsureShell, 1500);
+  setTimeout(rrEnsureShell, 3000);
+  try{ new MutationObserver(rrEnsureShell).observe(document.body, {childList:true}); }catch(e){}
 })();
 </script>"""
 # Theme-aware onboarding: rewrite hardcoded dark colours in the body (past the
